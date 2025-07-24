@@ -63,7 +63,7 @@
       <div class="auth-section">
         <div class="logo-container">
           <img class="user-avatar ms-3" src="https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452" alt="User Avatar">&nbsp;
-          <b class="logo-text text-black text-white">The Weeknd</b>
+          <b class="logo-text text-black text-white">{{props.displayName}}</b>
         </div>
         <div class="auth-item logout fw-bold" @click="emit('logout')">
           <i class="fas fa-sign-out-alt"></i>
@@ -79,7 +79,8 @@ import { ref } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
-  isSidebarOpen: Boolean
+  isSidebarOpen: Boolean,
+  displayName: String
 });
 
 const emit = defineEmits(['logout']);
