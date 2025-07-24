@@ -12,9 +12,18 @@
       />
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+      // Giờ axios có sẵn là biến global
+      const api = axios.create({
+          baseURL: "http://localhost:8989",
+      });
+
+  </script>
+    <script src="/src/api.js"></script>
   <body>
     <div class="snippet-container" id="app">
-    <script type="module" src="/src/main.js"></script>
+        <script type="module" src="/src/main.js"></script>
     </div>
   </body>
 </html>

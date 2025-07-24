@@ -16,6 +16,37 @@ function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value;
 }
 
+document.addEventListener('DOMContentLoaded', async function(){
+  await login();
+
+  const a= await isLogin();
+  console.log(a);
+});
+async function login() {
+  const tokenRes = await api.post( // DÙNG api CHỨ KHÔNG PHẢI axios
+      "/auth/admin/login",
+      {
+        email: "tampcps38349@fpt.edu.vn",
+        password: "Phamchitam217@",
+        rememberMe: true
+      }
+  );
+
+  const { accessToken, refreshToken } = tokenRes.data;
+  localStorage.setItem("accessToken", accessToken); // sửa key, đừng để dấu ":" dư
+  localStorage.setItem("refreshToken", refreshToken);
+
+  console.log("accessToken:", accessToken);
+  console.log("refreshToken:", refreshToken);
+}
+
+function isLogin(){
+  return api.get("/opulentia/isLogin").then(response => {
+    return response.data;
+  });
+}
+
+
 </script>
 
 <template>
