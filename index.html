@@ -10,17 +10,22 @@
               rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
       />
+      <!-- SweetAlert2 CSS -->
+      <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+      <!-- SweetAlert2 JS -->
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script>
-      // Giờ axios có sẵn là biến global
-      const api = axios.create({
-          baseURL: "http://localhost:8989",
-      });
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      <script>
+          // Giờ axios có sẵn là biến global
+          const api = axios.create({
+              baseURL: "http://localhost:8989",
+          });
 
-  </script>
-    <script src="/src/api.js"></script>
+      </script>
+      <script src="/src/assets/js/api.js"></script>
+  </head>
+
   <body>
     <div class="snippet-container" id="app">
         <script type="module" src="/src/main.js"></script>

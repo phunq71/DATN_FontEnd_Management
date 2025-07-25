@@ -7,7 +7,7 @@ const routes = [
     { path: '/', redirect: '/home' },
     { path: '/home', component: Home },
     { path: '/banhang', component: BanHang },
-    { path: '/qldonhang', name: 'QuanLyDonHang', component: QLDonHang }
+    { path: '/qldonhang', component: QLDonHang }
  // 👈 thêm route
 ]
 
