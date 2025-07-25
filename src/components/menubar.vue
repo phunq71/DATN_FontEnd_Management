@@ -8,10 +8,10 @@
 
       <!-- Menu -->
       <div class="menu-items">
-        <div class="menu-item">
+        <router-link to="/home" class="menu-item">
           <i class="fas fa-home"></i>
           <span>Trang chủ</span>
-        </div>
+        </router-link>
 
         <div class="menu-item" @click="toggleSubmenu('products')">
           <i class="fas fa-box"></i>
@@ -43,10 +43,10 @@
           <span>Bảo mật</span>
         </div>
 
-        <div class="menu-item">
+        <router-link to="/dashboard" class="menu-item">
           <i class="fa-solid fa-chart-line"></i>
           <span>Thống kê</span>
-        </div>
+        </router-link>
 
         <div class="menu-item" @click="toggleSubmenu('documents')">
           <i class="fas fa-file-alt"></i>
@@ -153,6 +153,7 @@ function toggleSubmenu(menu) {
   display: flex;
   align-items: center;
   position: relative;
+  text-decoration: none;
 }
 
 .menu-item:hover {
