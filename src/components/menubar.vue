@@ -22,7 +22,10 @@
           <div class="submenu-item">Danh mục sản phẩm</div>
           <div class="submenu-item">Sản phẩm</div>
         </div>
-
+        <router-link to="/qldonhang" class="menu-item">
+         <i class="fas fa-box"></i>
+          <span>Quản lý đơn hàng</span>
+        </router-link>
         <router-link to="/banhang" class="menu-item">
           <i class="fa-solid fa-receipt"></i>
           <span>Bán hàng</span>
