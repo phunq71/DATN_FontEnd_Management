@@ -42,7 +42,8 @@ async function toggleLogin() {
       title: 'Đăng nhập thất bại!',
       text: 'Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.',
       icon: 'error',
-      confirmButtonText: 'OK'
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#000000'
     });
   }
 }
@@ -73,6 +74,12 @@ async function isLogin(){
 }
 
 
+async function logout(){
+  await api.get("/logout");
+  showLogin.value=true;
+}
+
+
 </script>
 
 <template>
@@ -80,7 +87,7 @@ async function isLogin(){
     <menubar
         :isSidebarOpen="isSidebarOpen"
         :displayName="displayName"
-        @logout="toggleLogin(true)"
+        @logout="logout()"
     />
     <div :class="['main-container', { 'sidebar-opened': isSidebarOpen }]">
       <div class="menu-toggle">
