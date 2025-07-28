@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Vue</title>
+      <!-- Thêm vào file index.html -->
+      <link
+              rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      />
+      <!-- SweetAlert2 CSS -->
+      <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+      <!-- SweetAlert2 JS -->
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      <script>
+          // Giờ axios có sẵn là biến global
+          const api = axios.create({
+              baseURL: "http://localhost:8989",
+          });
+
+      </script>
+      <script src="/src/assets/js/api.js"></script>
+    <script type="module" crossorigin src="/assets/index-sG6YTF-L.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-OKN8v4q7.css">
+  </head>
+
+  <body>
+    <div class="snippet-container" id="app">
+    </div>
+  </body>
+</html>
