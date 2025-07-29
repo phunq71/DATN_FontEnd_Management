@@ -1,89 +1,54 @@
 <script setup>
-import Home from "./components/Home.vue";
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import menubar from "./components/menubar.vue";
-import BanHang from "./components/BanHang.vue";
+import Login from "./components/Login.vue";
 
-import { ref } from 'vue';
-
+const router = useRouter();
 const isSidebarOpen = ref(false);
-const showLogin = ref(true); // Thêm biến điều khiển hiển thị login
-const username = ref("");
-const password = ref("");
-
+const isAuthenticated = ref(false);
 const displayName = ref("");
-
-async function toggleLogin() {
-  try {
-    const response = await api.post("/api/auth/login2", {
-      email: username.value,
-      password: password.value,
-      rememberMe: false
-    },
-        { withCredentials: true }
-    );
-
-    displayName.value= response.data;
-    console.log(displayName.value);
-    // Thông báo thành công
-    Swal.fire({
-      title: 'Đăng nhập thành công!',
-      icon: 'success',
-      timer: 3000,
-      timerProgressBar: true,
-      showConfirmButton: false
-    }).then(ss => {
-      showLogin.value= false;
-      isSidebarOpen.value=false;
-    });
-
-  } catch (error) {
-    // Thông báo thất bại
-    await Swal.fire({
-      title: 'Đăng nhập thất bại!',
-      text: 'Vui lòng kiểm tra lại tài khoản hoặc mật khẩu.',
-      icon: 'error',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#000000'
-    });
-  }
-}
 
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value;
 }
 
-document.addEventListener('DOMContentLoaded', async function(){
-  const loggedIn = await isLogin();
-  if(loggedIn) {
-    showLogin.value = false;
-  }
-});
-
-async function isLogin(){
-  return api.get("/admin/isLogin", { withCredentials: true })
-      .then(response => {
-    if(response.data.loggedIn) {
+async function checkAuth() {
+  try {
+    const response = await api.get("/admin/isLogin", { withCredentials: true });
+    if (response.data.loggedIn) {
       displayName.value = response.data.displayName;
-      return true;
+      isAuthenticated.value = true;
+    } else {
+      isAuthenticated.value = false;
+      router.push('/login');
     }
-    return false;
-  }).catch(error => {
-    console.log("Lỗi:", error)
-    return false;
-  });
+  } catch (error) {
+    console.log("Lỗi:", error);
+    isAuthenticated.value = false;
+    router.push('/login');
+  }
 }
 
-
-async function logout(){
+async function logout() {
   await api.get("/logout");
-  showLogin.value=true;
+  isAuthenticated.value = false;
+  displayName.value = "";
+  router.push('/login');
 }
 
+function handleLoginSuccess(userData) {
+  displayName.value = userData;
+  isAuthenticated.value = true;
+}
 
+onMounted(() => {
+  checkAuth();
+});
 </script>
 
 <template>
-  <div id="main-container" v-if="!showLogin">
+  <div id="main-container" v-if="isAuthenticated">
     <menubar
         :isSidebarOpen="isSidebarOpen"
         :displayName="displayName"
@@ -97,30 +62,7 @@ async function logout(){
     </div>
   </div>
 
-
-  <div id="login-container" v-if="showLogin">
-    <h1 class="text-primary">Đăng nhập</h1>
-    <input type="text" placeholder="Tên đăng nhập" class="form-control" v-model="username">
-    <input type="password" placeholder="Mật khẩu" class="form-control" v-model="password">
-    <button
-        class="btn btn-outline-primary"
-        @click="toggleLogin()"
-    >
-      Đăng nhập
-    </button>
-  </div>
-
-
-
-<!--  <div class="wave-container">-->
-<!--    <div class="wave"></div>-->
-<!--  </div>-->
-<!--  <div class="background-icons">-->
-<!--    <i class="fas fa-coins bg-icon icon-1"></i>-->
-<!--    <i class="fas fa-chart-line bg-icon icon-2"></i>-->
-<!--    <i class="fas fa-university bg-icon icon-3"></i>-->
-<!--    <i class="fas fa-money-bill-wave bg-icon icon-4"></i>-->
-<!--  </div>-->
+  <router-view v-else name="auth" @login-success="handleLoginSuccess" />
 </template>
 
 <style scoped>
