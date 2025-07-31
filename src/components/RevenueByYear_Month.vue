@@ -1,19 +1,18 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import {onMounted, ref, watch} from 'vue'
 // import MyBarChart thay vì Bar trực tiếp
 import MyBarChart from './MyBarChart.vue'
 import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
   BarElement,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
   LineElement,
-  PointElement
+  PointElement,
+  Title,
+  Tooltip
 } from 'chart.js'
-import Minimenu from "./minimenu.vue";
 
 // Đăng ký components ChartJS
 ChartJS.register(
@@ -26,11 +25,14 @@ const chartData = ref({
   datasets: []
 })
 
+
 // State cho filter
 const selectedTimeRange = ref('year')
-const selectedYear = ref(new Date().getFullYear())
-const selectedMonth = ref(new Date().getMonth() + 1)
-
+const selectedYear = ref(0)
+const selectedMonth = ref(0)
+const years_select = ref([]);
+const totalRevenue = ref(0);
+const facilityName = ref('');
 // Options cho chart
 const chartOptions = ref({
   responsive: true,
@@ -46,17 +48,21 @@ const chartOptions = ref({
     },
     tooltip: {
       callbacks: {
-        label: function(context) {
+        label: function (context) {
           let label = context.dataset.label || ''
           if (label) label += ': '
+
           if (context.datasetIndex === 1) {
+            // Số lượng đơn
+            label += context.raw + ' đơn'
+          } else if (context.datasetIndex === 0) {
+            // Doanh thu -> format VND đầy đủ
             label += new Intl.NumberFormat('vi-VN', {
               style: 'currency',
               currency: 'VND'
             }).format(context.raw)
-          } else {
-            label += context.raw
           }
+
           return label
         }
       }
@@ -70,6 +76,15 @@ const chartOptions = ref({
       title: {
         display: true,
         text: 'Số lượng đơn'
+      },
+      // Thêm ID cho trục y
+      id: 'y',
+      // Đặt suggestedMax ở đây thay vì trong ticks
+      suggestedMax: 10, // Giá trị mặc định ban đầu
+      ticks: {
+        callback: function (value) {
+          return value + ' đơn'
+        }
       }
     },
     y1: {
@@ -84,11 +99,14 @@ const chartOptions = ref({
         drawOnChartArea: false
       },
       ticks: {
-        callback: function(value) {
-          return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-          }).format(value)
+        callback: function (value) {
+          if (value >= 1_000_000_000) {
+            return (value / 1_000_000_000) + ' tỷ'
+          } else if (value >= 1_000_000) {
+            return (value / 1_000_000) + ' triệu'
+          } else {
+            return new Intl.NumberFormat('vi-VN').format(value)
+          }
         }
       }
     }
@@ -96,15 +114,15 @@ const chartOptions = ref({
 })
 
 // Tạo dữ liệu mẫu
-const generateData = () => {
-  if (selectedTimeRange.value === 'year') {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const generateData = (data) => {
+  if (data != null) {
+    console.log("data nhận được", data)
     return {
-      labels: months,
+      labels: data.time,
       datasets: [
         {
           label: 'Doanh thu',
-          data: months.map(() => Math.floor(Math.random() * 20000) + 5000),
+          data: data.revenues,
           backgroundColor: '#66CCFF',
           borderColor: '#66CCFF',
           borderWidth: 2,
@@ -113,30 +131,7 @@ const generateData = () => {
         },
         {
           label: 'Số lượng đơn',
-          data: months.map(() => Math.floor(Math.random() * 500) + 100),
-          backgroundColor: '#0066CC',
-          borderColor: '#0066CC',
-          borderWidth: 1
-        }
-      ]
-    }
-  } else {
-    const days = Array.from({ length: 30 }, (_, i) => i + 1)
-    return {
-      labels: days.map(d => `${d}`),
-      datasets: [
-        {
-          label: 'Doanh thu',
-          data: days.map(() => Math.floor(Math.random() * 2000) + 500),
-          backgroundColor: '#66CCFF',
-          borderColor: '#66CCFF',
-          borderWidth: 2,
-          type: 'line',
-          yAxisID: 'y1'
-        },
-        {
-          label: 'Số lượng đơn',
-          data: days.map(() => Math.floor(Math.random() * 30) + 5),
+          data: data.orderCounts,
           backgroundColor: '#0066CC',
           borderColor: '#0066CC',
           borderWidth: 1
@@ -146,32 +141,149 @@ const generateData = () => {
   }
 }
 
-// Cập nhật dữ liệu chart
-const updateChart = () => {
-  const newData = generateData()
-  chartData.value = newData
 
-  chartOptions.value.plugins.title.text =
-      selectedTimeRange.value === 'year'
-          ? `BÁO CÁO BÁN HÀNG NĂM ${selectedYear.value}`
-          : `BÁO CÁO BÁN HÀNG THÁNG ${selectedMonth.value}/${selectedYear.value}`
+// Cập nhật dữ liệu chart
+const updateChart = async () => {
+
+  if (selectedTimeRange.value === 'year') {
+    chartData.value = generateData(await getRevenueByYear());
+    chartOptions.value.plugins.title.text = `BÁO CÁO BÁN HÀNG THEO NĂM`
+  } else {
+    chartData.value = generateData(await getRevenueByMonth(selectedYear.value, selectedMonth.value));
+    chartOptions.value.plugins.title.text = `BÁO CÁO BÁN HÀNG CÁC THÁNG TRONG NĂM ${selectedYear.value}`
+  }
 }
 
-// Tính tổng doanh thu
-const totalRevenue = computed(() => {
-  if (!chartData.value.datasets[1]) return 0
-  return chartData.value.datasets[1].data.reduce((a, b) => a + b, 0)
-})
 
 // Khởi tạo ban đầu
-onMounted(updateChart)
+onMounted(async () => {
+  await getAvailableYear();
+  await updateChart();
+
+});
+
+async function getRevenueByYear() {
+  try {
+    const response = await api.get("/admin/dashboard/revenueByYear", {withCredentials: true});
+    const data = response.data;
+    console.log("API Data:", data);
+
+    let rawRevenue = [];
+
+
+    // Kiểm tra trường hợp AREA
+    if (data.hasOwnProperty("facilityName") && data.hasOwnProperty("revenueByYear")) {
+      facilityName.value = data.facilityName;
+      rawRevenue = data.revenueByYear;
+    } else {
+      // Trường hợp ADMIN
+      rawRevenue = data;
+    }
+
+    const years = rawRevenue.map(item => item.time);
+    const orderCounts = rawRevenue.map(item => item.orderCount);
+    const maxOrderCount = Math.max(...orderCounts);
+    chartOptions.value.scales.y.suggestedMax = Math.ceil(maxOrderCount * 1.1);
+    const revenues = rawRevenue.map(item => item.revenue);
+
+    console.log("Years:", years);
+    console.log("Order Counts:", orderCounts);
+    console.log("Revenues:", revenues);
+
+
+    return {
+      time: years,
+      orderCounts: orderCounts,
+      revenues: revenues
+    };
+
+  } catch (error) {
+    console.log(error);
+    Swal.fire({
+      title: 'Bạn không có quyền xem mục này!',
+      icon: 'error',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#000000'
+    });
+    return null;
+  }
+}
+
+
+async function getRevenueByMonth(year) {
+  try {
+    const response = await api.get(`/admin/dashboard/revenueByMonth/${year}`, {withCredentials: true});
+    const data = response.data;
+    console.log(data);
+
+    const months = data.map(item => item.time);
+    const orderCounts = data.map(item => item.orderCount);
+    const maxOrderCount = Math.max(...orderCounts);
+    // Cập nhật suggestedMax trực tiếp trong scale options
+    updateMaxOrderCount(maxOrderCount);
+
+    const revenues = data.map(item => item.revenue);
+    revenues.forEach(revenue => {
+      totalRevenue.value += revenue;
+    });
+    console.log("months:", months);
+    console.log("Order Counts:", orderCounts);
+    console.log("Revenues:", revenues);
+
+
+    return {
+      time: months,
+      orderCounts: orderCounts,
+      revenues: revenues
+    };
+  } catch (error) {
+    console.log(error);
+    Swal.fire({
+      title: 'Bạn không có quyền xem mục này!',
+      icon: 'error',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#000000'
+    });
+    // return { years: [], orderCounts: [], revenues: [] };
+    return null;
+  }
+}
+
+async function getAvailableYear() {
+  await api.get("/admin/dashboard/revenue/availableYear", {withCredentials: true})
+      .then(response => {
+        years_select.value = response.data;
+        selectedYear.value = years_select.value[0];
+        console.log(years_select.value);
+      }).catch(error => {
+        console.log(error);
+        Swal.fire({
+          title: 'Lỗi lấy năm',
+          text: "Vui lòng truy cập sau",
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#000000'
+        });
+      });
+}
+
+// Thay đổi cách cập nhật suggestedMax
+const updateMaxOrderCount = (maxOrderCount) => {
+  chartOptions.value = {
+    ...chartOptions.value,
+    scales: {
+      ...chartOptions.value.scales,
+      y: {
+        ...chartOptions.value.scales.y,
+        suggestedMax: Math.ceil(maxOrderCount * 1.1)
+      }
+    }
+  }
+}
 
 // Theo dõi thay đổi filter
 watch([selectedTimeRange, selectedYear, selectedMonth], updateChart)
 
-// Danh sách năm và tháng
-const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)
-const months = Array.from({ length: 12 }, (_, i) => i + 1)
 </script>
 
 <template>
@@ -192,32 +304,49 @@ const months = Array.from({ length: 12 }, (_, i) => i + 1)
     </div>
 
     <div class="select-group">
-      <div class="filter-group year-select">
+      <div v-if="selectedTimeRange === 'month'" class="filter-group year-select">
         <label>Năm:</label>
         <select v-model="selectedYear">
-          <option v-for="year in years" :value="year">{{ year }}</option>
+          <option v-for="year in years_select" :value="year">{{ year }}</option>
         </select>
       </div>
 
-      <transition name="slide-fade">
-        <div v-if="selectedTimeRange === 'month'" class="filter-group month-select">
-          <label>Tháng:</label>
-          <select v-model="selectedMonth">
-            <option v-for="month in months" :value="month">{{ month }}</option>
-          </select>
-        </div>
-      </transition>
     </div>
   </div>
 
-  <div class="summary-card">
-    <h3>Tổng doanh thu</h3>
-    <p class="revenue">
-      {{ new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalRevenue) }}
-    </p>
-    <p v-if="selectedTimeRange === 'year'">Năm {{ selectedYear }}</p>
-    <p v-else>Tháng {{ selectedMonth }}/{{ selectedYear }}</p>
+  <div v-if="!facilityName">
+    <div v-if="selectedTimeRange === 'month'" class="summary-card">
+      <h3>Tổng doanh thu: </h3>
+      <p class="revenue">
+        {{ new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(totalRevenue) }}
+      </p>
+      <p v-if="selectedTimeRange === 'year'">Năm {{ selectedYear }}</p>
+      <p v-else>Trong năm: {{ selectedYear }}</p>
+    </div>
   </div>
+
+  <div v-else>
+    <div v-if="selectedTimeRange === 'year'" class="summary-card">
+      <h3></h3>
+      <p class="revenue">
+        {{ facilityName }}
+      </p>
+      <p v-if="selectedTimeRange === 'year'"></p>
+
+    </div>
+
+
+
+    <div v-if="selectedTimeRange === 'month'" class="summary-card">
+      <h3>{{ facilityName }}:</h3>
+      <p class="revenue">
+        {{ new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(totalRevenue) }}
+      </p>
+      <p v-if="selectedTimeRange === 'year'">Năm {{ selectedYear }}</p>
+      <p v-else>Trong năm: {{ selectedYear }}</p>
+    </div>
+  </div>
+
 
   <div class="chart-container">
     <MyBarChart
@@ -414,6 +543,7 @@ const months = Array.from({ length: 12 }, (_, i) => i + 1)
   .chart-container {
     min-height: 400px;
   }
+
   .chart-container canvas {
     height: 400px !important;
   }
