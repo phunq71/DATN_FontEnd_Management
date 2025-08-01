@@ -33,10 +33,10 @@
           <span>Khuyến mãi</span>
         </div>
 
-        <div class="menu-item">
-          <i class="fa-solid fa-users"></i>
-          <span>Người dùng</span>
-        </div>
+        <router-link to="/product" class="menu-item">
+          <i class="fas fa-box"></i>
+          <span>Quản lý sản phẩm</span>
+        </router-link>
 
         <div class="menu-item">
           <i class="fa-solid fa-lock"></i>
