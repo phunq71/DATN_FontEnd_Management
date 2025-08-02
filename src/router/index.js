@@ -5,6 +5,7 @@ import Dashboard from "../components/Dashboard.vue";
 import Login from "../components/Login.vue";
 import StaffManagement from "../components/StaffManagement.vue";
 
+import Category from '../components/Category.vue';
 const routes = [
     {
         path: '/',
@@ -29,6 +30,11 @@ const routes = [
     {
         path: '/staffs',
         component: StaffManagement,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/category',
+        component: Category,
         meta: { requiresAuth: true }
     },
     {
