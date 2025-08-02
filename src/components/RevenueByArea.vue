@@ -69,7 +69,7 @@ async function getRevenueArea(year = null) {
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching revenue data:", error);
+    //console.error("Error fetching revenue data:", error);
     return [];
   }
 }

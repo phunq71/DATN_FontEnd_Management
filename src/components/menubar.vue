@@ -33,10 +33,10 @@
           <span>Khuyến mãi</span>
         </div>
 
-        <div class="menu-item">
+        <router-link to="/staffs" class="menu-item">
           <i class="fa-solid fa-users"></i>
-          <span>Người dùng</span>
-        </div>
+          <span>Quản lý nhân viên</span>
+        </router-link>
 
         <div class="menu-item">
           <i class="fa-solid fa-lock"></i>

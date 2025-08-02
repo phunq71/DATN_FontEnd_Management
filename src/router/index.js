@@ -3,6 +3,7 @@ import Home from "../components/Home.vue";
 import BanHang from "../components/BanHang.vue";
 import Dashboard from "../components/Dashboard.vue";
 import Login from "../components/Login.vue";
+import StaffManagement from "../components/StaffManagement.vue";
 
 const routes = [
     {
@@ -23,6 +24,11 @@ const routes = [
     {
         path: '/dashboard',
         component: Dashboard,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/staffs',
+        component: StaffManagement,
         meta: { requiresAuth: true }
     },
     {

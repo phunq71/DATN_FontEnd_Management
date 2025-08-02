@@ -116,7 +116,7 @@ const chartOptions = ref({
 // Tạo dữ liệu mẫu
 const generateData = (data) => {
   if (data != null) {
-    console.log("data nhận được", data)
+    //console.log("data nhận được", data)
     return {
       labels: data.time,
       datasets: [
@@ -166,7 +166,7 @@ async function getRevenueByYear() {
   try {
     const response = await api.get("/admin/dashboard/revenueByYear", {withCredentials: true});
     const data = response.data;
-    console.log("API Data:", data);
+    //console.log("API Data:", data);
 
     let rawRevenue = [];
 
@@ -186,9 +186,9 @@ async function getRevenueByYear() {
     chartOptions.value.scales.y.suggestedMax = Math.ceil(maxOrderCount * 1.1);
     const revenues = rawRevenue.map(item => item.revenue);
 
-    console.log("Years:", years);
-    console.log("Order Counts:", orderCounts);
-    console.log("Revenues:", revenues);
+    //console.log("Years:", years);
+    //console.log("Order Counts:", orderCounts);
+    //console.log("Revenues:", revenues);
 
 
     return {
@@ -198,7 +198,7 @@ async function getRevenueByYear() {
     };
 
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     Swal.fire({
       title: 'Bạn không có quyền xem mục này!',
       icon: 'error',
@@ -214,7 +214,7 @@ async function getRevenueByMonth(year) {
   try {
     const response = await api.get(`/admin/dashboard/revenueByMonth/${year}`, {withCredentials: true});
     const data = response.data;
-    console.log(data);
+    //console.log(data);
 
     const months = data.map(item => item.time);
     const orderCounts = data.map(item => item.orderCount);
@@ -226,9 +226,9 @@ async function getRevenueByMonth(year) {
     revenues.forEach(revenue => {
       totalRevenue.value += revenue;
     });
-    console.log("months:", months);
-    console.log("Order Counts:", orderCounts);
-    console.log("Revenues:", revenues);
+    //console.log("months:", months);
+    //console.log("Order Counts:", orderCounts);
+    //console.log("Revenues:", revenues);
 
 
     return {
@@ -237,7 +237,7 @@ async function getRevenueByMonth(year) {
       revenues: revenues
     };
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     Swal.fire({
       title: 'Bạn không có quyền xem mục này!',
       icon: 'error',
@@ -254,9 +254,9 @@ async function getAvailableYear() {
       .then(response => {
         years_select.value = response.data;
         selectedYear.value = years_select.value[0];
-        console.log(years_select.value);
+        //console.log(years_select.value);
       }).catch(error => {
-        console.log(error);
+        //console.log(error);
         Swal.fire({
           title: 'Lỗi lấy năm',
           text: "Vui lòng truy cập sau",
