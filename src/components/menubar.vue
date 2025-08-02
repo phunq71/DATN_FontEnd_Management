@@ -19,7 +19,7 @@
           <i :class="['fas fa-chevron-down chevron', { open: isProductsOpen }]"></i>
         </div>
         <div class="submenu" :class="{ open: isProductsOpen }">
-          <div class="submenu-item">Danh mục sản phẩm</div>
+          <router-link to="/category" class="submenu-item">Danh mục sản phẩm</router-link>
           <div class="submenu-item">Sản phẩm</div>
         </div>
 
@@ -191,6 +191,8 @@ function toggleSubmenu(menu) {
   color: #ffff;
   cursor: pointer;
   font-size: 14px;
+  display: block;
+  text-decoration: none;
 }
 
 .submenu-item:hover {
