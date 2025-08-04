@@ -7,6 +7,10 @@ import Product from "../components/Product.vue";
 import ProductDetail from "../components/ProductDetail.vue";
 import CreateProduct from "../components/CreateProduct.vue";
 
+import StaffManagement from "../components/StaffManagement.vue";
+
+
+import Category from '../components/Category.vue';
 const routes = [
     {
         path: '/',
@@ -42,6 +46,14 @@ const routes = [
         path: '/products/:id',
         name: 'ProductDetail',
         component: ProductDetail,
+    },
+    {    path: '/staffs',
+        component: StaffManagement,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/category',
+        component: Category,
         meta: { requiresAuth: true }
     },
     {

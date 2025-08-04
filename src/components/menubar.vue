@@ -13,15 +13,7 @@
           <span>Trang chủ</span>
         </router-link>
 
-        <div class="menu-item" @click="toggleSubmenu('products')">
-          <i class="fas fa-box"></i>
-          <span>Quản lý Sản phẩm</span>
-          <i :class="['fas fa-chevron-down chevron', { open: isProductsOpen }]"></i>
-        </div>
-        <div class="submenu" :class="{ open: isProductsOpen }">
-          <div class="submenu-item">Danh mục sản phẩm</div>
-          <div class="submenu-item">Sản phẩm</div>
-        </div>
+
 
         <router-link to="/banhang" class="menu-item">
           <i class="fa-solid fa-receipt"></i>
@@ -33,9 +25,20 @@
           <span>Khuyến mãi</span>
         </div>
 
+        <router-link to="/category" class="menu-item">
+          <i class="fa-solid fa-folder"></i>
+          <span>Quản lý danh mục</span>
+        </router-link>
+
         <router-link to="/product" class="menu-item">
           <i class="fas fa-box"></i>
           <span>Quản lý sản phẩm</span>
+        </router-link>
+
+        <router-link to="/staffs" class="menu-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Quản lý nhân viên</span>
+
         </router-link>
 
         <div class="menu-item">
@@ -191,6 +194,8 @@ function toggleSubmenu(menu) {
   color: #ffff;
   cursor: pointer;
   font-size: 14px;
+  display: block;
+  text-decoration: none;
 }
 
 .submenu-item:hover {

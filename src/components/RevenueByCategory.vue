@@ -92,10 +92,10 @@ watch(selectedYear, async (newYear) => {
 async function getYears() {
   years.value = await api.get("/admin/dashboard/revenueByCategory/availableYears", {withCredentials: true})
       .then(res => {
-        console.log("available year: ", res.data)
+        //console.log("available year: ", res.data)
         return res.data
       }).catch(error => {
-        console.log(error)
+        //console.log(error)
         return []
       })
 }
@@ -103,11 +103,11 @@ async function getYears() {
 async function getRevenueByCategory(year) {
   const resp = await api.get("/admin/dashboard/revenueByCategory?year="+year, {withCredentials: true})
       .then(res => {
-        console.log("Data: ", res.data)
+        //console.log("Data: ", res.data)
         updateChartFromApiData(res.data)
         return res.data
       }).catch(error => {
-        console.log(error)
+        //console.log(error)
         return []
       })
 }
