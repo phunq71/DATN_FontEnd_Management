@@ -2,7 +2,6 @@
 import Home from "./components/Home.vue";
 import menubar from "./components/menubar.vue";
 import BanHang from "./components/BanHang.vue";
-
 import { ref } from 'vue';
 
 const isSidebarOpen = ref(false);
@@ -83,8 +82,8 @@ async function isLogin(){
         @logout="toggleLogin(true)"
     />
     <div :class="['main-container', { 'sidebar-opened': isSidebarOpen }]">
-      <div class="menu-toggle" @click="toggleSidebar">
-        <i class="fas fa-sliders-h"></i>
+      <div class="menu-toggle">
+        <i class="fas fa-sliders-h" @click="toggleSidebar"></i>
       </div>
       <router-view />
     </div>
@@ -105,15 +104,15 @@ async function isLogin(){
 
 
 
-  <div class="wave-container">
-    <div class="wave"></div>
-  </div>
-  <div class="background-icons">
-    <i class="fas fa-coins bg-icon icon-1"></i>
-    <i class="fas fa-chart-line bg-icon icon-2"></i>
-    <i class="fas fa-university bg-icon icon-3"></i>
-    <i class="fas fa-money-bill-wave bg-icon icon-4"></i>
-  </div>
+<!--  <div class="wave-container">-->
+<!--    <div class="wave"></div>-->
+<!--  </div>-->
+<!--  <div class="background-icons">-->
+<!--    <i class="fas fa-coins bg-icon icon-1"></i>-->
+<!--    <i class="fas fa-chart-line bg-icon icon-2"></i>-->
+<!--    <i class="fas fa-university bg-icon icon-3"></i>-->
+<!--    <i class="fas fa-money-bill-wave bg-icon icon-4"></i>-->
+<!--  </div>-->
 </template>
 
 <style scoped>
@@ -152,9 +151,11 @@ async function isLogin(){
   cursor: pointer;
 }
 .menu-toggle {
-  position: absolute;
+  display: inline-block;
+  position: sticky;
   top: 15px;
   left: 20px;
+  margin-left: 20px;
   font-size: 24px;
   color: #3b82f6;
   cursor: pointer;
@@ -163,7 +164,7 @@ async function isLogin(){
 }
 
 .menu-toggle:hover {
-  transform: scale(1.1);
+ color: #1f2937;
 }
 
 
