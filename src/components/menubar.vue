@@ -13,19 +13,12 @@
           <span>Trang chủ</span>
         </router-link>
 
-        <div class="menu-item" @click="toggleSubmenu('products')">
-          <i class="fas fa-box"></i>
-          <span>Quản lý Sản phẩm</span>
-          <i :class="['fas fa-chevron-down chevron', { open: isProductsOpen }]"></i>
-        </div>
-        <div class="submenu" :class="{ open: isProductsOpen }">
-          <div class="submenu-item">Danh mục sản phẩm</div>
-          <div class="submenu-item">Sản phẩm</div>
-        </div>
+
         <router-link to="/OrderManagement" class="menu-item">
          <i class="fas fa-box"></i>
           <span>Quản lý đơn hàng</span>
         </router-link>
+
         <router-link to="/banhang" class="menu-item">
           <i class="fa-solid fa-receipt"></i>
           <span>Bán hàng</span>
@@ -36,10 +29,21 @@
           <span>Khuyến mãi</span>
         </div>
 
-        <div class="menu-item">
+        <router-link to="/category" class="menu-item">
+          <i class="fa-solid fa-folder"></i>
+          <span>Quản lý danh mục</span>
+        </router-link>
+
+        <router-link to="/product" class="menu-item">
+          <i class="fas fa-box"></i>
+          <span>Quản lý sản phẩm</span>
+        </router-link>
+
+        <router-link to="/staffs" class="menu-item">
           <i class="fa-solid fa-users"></i>
-          <span>Người dùng</span>
-        </div>
+          <span>Quản lý nhân viên</span>
+
+        </router-link>
 
         <div class="menu-item">
           <i class="fa-solid fa-lock"></i>
@@ -65,8 +69,8 @@
       <!-- Auth section -->
       <div class="auth-section">
         <div class="logo-container">
-          <img class="user-avatar ms-3" src="https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452" alt="User Avatar">&nbsp;
-          <b class="logo-text text-black text-white">{{props.displayName}}</b>
+
+          <b class="logo-text text-black text-white" style="margin-left: 20px;">{{props.displayName}}</b>
         </div>
         <div class="auth-item logout fw-bold" @click="emit('logout')">
           <i class="fas fa-sign-out-alt"></i>
@@ -194,6 +198,8 @@ function toggleSubmenu(menu) {
   color: #ffff;
   cursor: pointer;
   font-size: 14px;
+  display: block;
+  text-decoration: none;
 }
 
 .submenu-item:hover {

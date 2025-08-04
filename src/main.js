@@ -14,6 +14,11 @@ const app = createApp(App)
 app.use(router)
 app.mount('#app')
 
-function isLogin(){
-
+export function isAdmin(){
+    return api.get("/admin/isAdmin", {withCredentials: true}).then(response => {
+        return response.data;
+    }).catch(error => {
+        console.log(error);
+        return false;
+    });
 }

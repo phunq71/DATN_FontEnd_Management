@@ -3,9 +3,10 @@
 import RevenueByYear_Month from "./RevenueByYear_Month.vue";
 import RevenueByArea from "./RevenueByArea.vue";
 import RevenueByCategory from "./RevenueByCategory.vue";
-
+import RevenueByShop from "./RevenueByShop.vue";
 
 import { ref } from 'vue'
+
 
 // Tab đang chọn
 const activeTab = ref('year')
@@ -37,6 +38,15 @@ const activeTab = ref('year')
           >
             Doanh thu theo sản phẩm
           </button>
+
+          <button
+              class="nav-link"
+              :class="{ active: activeTab === 'map' }"
+              @click="activeTab = 'map'"
+          >
+            Bản đồ doanh thu
+          </button>
+
         </div>
       </div>
     </nav>
@@ -45,6 +55,7 @@ const activeTab = ref('year')
       <RevenueByYear_Month v-if="activeTab === 'year'" />
       <RevenueByArea v-if="activeTab === 'area'" />
       <RevenueByCategory v-if="activeTab === 'category'" />
+      <RevenueByShop v-if="activeTab === 'map'"/>
     </div>
   </div>
 </template>

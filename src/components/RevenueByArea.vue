@@ -1,5 +1,5 @@
 <script setup>
-import {ref, computed, watch} from 'vue'
+import {ref, computed, watch, onMounted} from 'vue'
 import {Bar, Line} from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -15,107 +15,168 @@ import {
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement)
 
-// Time range selection
-const selectedTimeRange = ref('year')
+// Time range selection - Mặc định hiển thị theo năm trước
+const selectedTimeRange = ref('monthly')
 const currentDate = new Date()
-const currentYear = currentDate.getFullYear()
-const currentMonth = currentDate.getMonth() + 1
 
-// Year and month selection
-const selectedYear = ref(currentYear)
-const selectedMonth = ref(currentMonth)
-const years = ref(Array.from({length: 5}, (_, i) => currentYear - 2 + i))
-const months = ref(Array.from({length: 12}, (_, i) => i + 1))
+// Year selection
+const selectedYear = ref(new Date().getFullYear());
+const years = ref([]);
+const availableRegions = ref([]);
 
-// Mock data generation
-const generateMockData = () => {
-  const regions = ['Bắc', 'Trung', 'Nam', 'Tây Nam Bộ']
-  const data = {}
+const chartData = ref({
+  labels: [],
+  datasets: []
+});
 
-  // Generate yearly data for the past 5 years
-  years.value.forEach(year => {
-    data[year] = {}
+// Fetch data when component mounts
+onMounted(() => {
+  fetchRevenueData();
+});
 
-    // Generate monthly data for each year
-    months.value.forEach(month => {
-      data[year][month] = regions.reduce((acc, region) => {
-        // Random revenue between 500 million and 5 billion
-        acc[region] = Math.floor(Math.random() * 4500000000) + 500000000
-        return acc
-      }, {})
-    })
-  })
+// Watch for changes in time range or year selection
+watch([selectedTimeRange, selectedYear], () => {
+  fetchRevenueData();
+});
 
-  return data
+// Fetch data based on current selection
+const fetchRevenueData = async () => {
+  if (selectedTimeRange.value === 'yearly') {
+    const data = await getRevenueArea(selectedYear.value);
+    chartData.value = generateBarChartData(data);
+    chartOptions.value.plugins.title.text = `BÁO CÁO BÁN HÀNG THEO THÁNG NĂM ${selectedYear.value}`;
+  } else {
+    const data = await getRevenueArea();
+    chartData.value = generateLineChartData(data);
+    chartOptions.value.plugins.title.text = `BÁO CÁO BÁN HÀNG THEO NĂM`;
+  }
 }
 
-const mockData = generateMockData()
+// API call to get revenue by area
+async function getRevenueArea(year = null) {
+  const url = year ? `/admin/dashboard/revenueByArea?year=${year}` : '/admin/dashboard/revenueByArea';
 
-// Computed properties
-const totalRevenue = computed(() => {
-  if (selectedTimeRange.value === 'year') {
-    return Object.values(mockData[selectedYear.value])
-        .flatMap(monthData => Object.values(monthData))
-        .reduce((sum, revenue) => sum + revenue, 0)
-  } else {
-    return Object.values(mockData[selectedYear.value][selectedMonth.value])
-        .reduce((sum, revenue) => sum + revenue, 0)
-  }
-})
+  try {
+    const response = await api.get(url, {withCredentials: true});
 
-const chartData = computed(() => {
-  const regions = ['Bắc', 'Trung', 'Nam', 'Tây Nam Bộ']
-
-  if (selectedTimeRange.value === 'year') {
-    // Yearly view - show monthly data for all regions (Bar Chart)
-    return {
-      labels: months.value.map(m => `Tháng ${m}`),
-      datasets: regions.map(region => ({
-        label: `Khu vực miền ${region}`,
-        data: months.value.map(month => mockData[selectedYear.value][month][region]),
-        backgroundColor: getRegionColorBar(region),
-        borderColor: getRegionColorBar(region),
-        borderWidth: 1,
-        type: 'bar' // Specify chart type
-      }))
+    // Extract unique years for dropdown
+    if (!year) {
+      years.value = [...new Set(response.data.map(item => item.time))].sort();
     }
-  } else {
-    // Monthly view - show trend for selected month across years (Line Chart)
-    return {
-      labels: years.value.map(y => `Năm ${y}`),
-      datasets: regions.map(region => ({
-        label: `Khu vực miền ${region}`,
-        data: years.value.map(year => mockData[year][selectedMonth.value][region]),
-        borderColor: getRegionColorLine(region),
-        backgroundColor: 'transparent',
-        borderWidth: 3, // Giảm độ dày đường kẻ một chút
-        pointBackgroundColor: getRegionColorLine(region),
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        tension: 0, // Quan trọng: Đặt bằng 0 để có đường gấp khúc
-        stepped: false, // Đảm bảo không phải dạng bậc thang
-        borderJoinStyle: 'miter', // Kiểu nối các đoạn thẳng (miter/round/bevel)
-        fill: false // Không tô màu dưới đường
-      }))
-    }
+
+    // Extract unique regions
+    availableRegions.value = [...new Set(response.data.map(item => item.area))];
+
+    return response.data;
+  } catch (error) {
+    //console.error("Error fetching revenue data:", error);
+    return [];
   }
-});
+}
+
+// Generate data for bar chart (yearly view)
+function generateBarChartData(data) {
+  const datasets = [];
+  const labels = [];
+  const revenueByMonth = {};
+
+  // Process data to group by month and region
+  data.forEach(item => {
+    if (!revenueByMonth[item.time]) {
+      revenueByMonth[item.time] = {};
+      labels.push(`Tháng ${item.time}`);
+    }
+
+    revenueByMonth[item.time][item.area] = item.revenue;
+  });
+
+  // Tạo màu sắc theo tông xanh biển với các độ đậm nhạt khác nhau
+  const blueColors = [
+    '#0066CC', // Màu chính
+    '#66A3FF', // Nhạt hơn 40%
+    '#99C2FF', // Nhạt hơn 60%
+    '#CCE0FF'  // Nhạt hơn 80%
+  ];
+
+  // Create datasets for each region dynamically
+  availableRegions.value.forEach((region, index) => {
+    const colorIndex = index % blueColors.length;
+    datasets.push({
+      label: region, // Shorten label
+      data: labels.map((_, index) => revenueByMonth[index+1]?.[region] || 0),
+      backgroundColor: blueColors[colorIndex],
+      borderColor: blueColors[colorIndex],
+      borderWidth: 1
+    });
+  });
+
+  return {
+    labels,
+    datasets
+  };
+}
+
+// Generate data for line chart (monthly view)
+function generateLineChartData(data) {
+  const datasets = [];
+  const revenueByYear = {};
+
+  // Process data to group by year and region
+  data.forEach(item => {
+    if (!revenueByYear[item.time]) {
+      revenueByYear[item.time] = {};
+    }
+    revenueByYear[item.time][item.area] = item.revenue;
+  });
+
+  // Tạo màu sắc theo tông xanh biển với các độ đậm nhạt khác nhau
+  const blueColors = [
+    '#0066CC', // Màu chính
+    '#3385FF', // Nhạt hơn 20%
+    '#66A3FF', // Nhạt hơn 40%
+    '#99C2FF', // Nhạt hơn 60%
+    '#CCE0FF'  // Nhạt hơn 80%
+  ];
+
+  // Create datasets for each region dynamically
+  availableRegions.value.forEach((region, index) => {
+    const colorIndex = index % blueColors.length;
+    datasets.push({
+      label: region, // Shorten label
+      data: years.value.map(year => revenueByYear[year]?.[region] || 0),
+      borderColor: blueColors[colorIndex],
+      backgroundColor: 'transparent',
+      borderWidth: 3,
+      pointBackgroundColor: blueColors[colorIndex],
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      tension: 0
+    });
+  });
+
+  return {
+    labels: years.value.map(year => `Năm ${year}`),
+    datasets
+  };
+}
 
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   animation: {
-    duration: 1000,         // Tổng thời gian vẽ (ms)
-    easing: 'easeInOutQuart', // Kiểu easing mượt
-  },
-  interaction: {
-    mode: 'nearest',
-    axis: 'x',
-    intersect: false
+    duration: 1000,
+    easing: 'easeInOutQuart',
   },
   plugins: {
     legend: {
       position: 'top'
+    },
+    title: {
+      display: true,
+      text: 'BÁO CÁO BÁN HÀNG',
+      font: {
+        size: 16
+      }
     },
     tooltip: {
       callbacks: {
@@ -133,27 +194,18 @@ const chartOptions = computed(() => ({
       }
     }
   },
-  elements: {
-    line: {
-      tension: 0, // Đường gấp khúc (0: không bo cong)
-      borderWidth: 3
-    },
-    point: {
-      radius: 5,
-      hoverRadius: 7
-    }
-  },
   scales: {
     y: {
       beginAtZero: false,
       ticks: {
         callback: function (value) {
-          return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-            notation: 'compact',
-            compactDisplay: 'short'
-          }).format(value);
+          if (value >= 1_000_000_000) {
+            return (value / 1_000_000_000) + ' tỷ'
+          } else if (value >= 1_000_000) {
+            return (value / 1_000_000) + ' triệu'
+          } else {
+            return new Intl.NumberFormat('vi-VN').format(value)
+          }
         }
       },
       grid: {
@@ -168,90 +220,69 @@ const chartOptions = computed(() => ({
   }
 }));
 
-// Helper function for region colors
-function getRegionColorBar(region) {
-  const colors = {
-    'Bắc': '#4285F4',
-    'Trung': '#6EA9F7',
-    'Nam': '#A5CFF9',
-    'Tây Nam Bộ': '#DCEEFF'
-  };
-  return colors[region] || '#4285F4'; // fallback
-}
+const totalRevenue = computed(() => {
+  if (!chartData.value.datasets.length) return 0;
 
-function getRegionColorLine(region) {
-  const colors = {
-    'Bắc': '#4285F4',      // Xanh đậm
-    'Trung': '#63A9F9',    // Xanh trung bình
-    'Nam': '#86BFFB',      // Xanh nhạt hơn
-    'Tây Nam Bộ': '#A9D5FD' // Xanh rất nhạt
-  };
-  return colors[region] || '#4285F4'; // fallback
-}
+  return chartData.value.datasets.reduce((total, dataset) => {
+    return total + dataset.data.reduce((sum, value) => sum + value, 0);
+  }, 0);
+});
 </script>
 
 <template>
-  <div class="filters">
-    <div class="button-group">
-      <button
-          @click="selectedTimeRange = 'year'"
-          :class="{ active: selectedTimeRange === 'year' }"
-      >
-        Theo năm
-      </button>
-      <button
-          @click="selectedTimeRange = 'month'"
-          :class="{ active: selectedTimeRange === 'month' }"
-      >
-        Theo tháng
-      </button>
-    </div>
-
-    <div class="select-group">
-      <div class="filter-group year-select">
-        <label>Năm:</label>
-        <select v-model="selectedYear">
-          <option v-for="year in years" :value="year">{{ year }}</option>
-        </select>
+  <div class="dashboard-container">
+    <div class="filters">
+      <div class="button-group">
+        <button
+            @click="selectedTimeRange = 'monthly'"
+            :class="{ active: selectedTimeRange === 'monthly' }"
+        >
+          Theo năm
+        </button>
+        <button
+            @click="selectedTimeRange = 'yearly'"
+            :class="{ active: selectedTimeRange === 'yearly' }"
+        >
+          Theo tháng trong năm
+        </button>
       </div>
 
-      <transition name="slide-fade">
-        <div v-if="selectedTimeRange === 'month'" class="filter-group month-select">
-          <label>Tháng:</label>
-          <select v-model="selectedMonth">
-            <option v-for="month in months" :value="month">{{ month }}</option>
+      <div class="select-group" v-if="selectedTimeRange === 'yearly'">
+        <div class="filter-group year-select">
+          <label>Năm:</label>
+          <select v-model="selectedYear">
+            <option v-for="year in years" :value="year">{{ year }}</option>
           </select>
         </div>
-      </transition>
+      </div>
     </div>
-  </div>
 
-  <div class="summary-card">
-    <h3>Tổng doanh thu</h3>
-    <p class="revenue">
-      {{ new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(totalRevenue) }}
-    </p>
-    <p v-if="selectedTimeRange === 'year'">Năm {{ selectedYear }}</p>
-    <p v-else>Tháng {{ selectedMonth }} ({{ selectedYear }})</p>
-  </div>
+    <div class="summary-card">
+      <h3>Tổng doanh thu</h3>
+      <p class="revenue">
+        {{ new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(totalRevenue) }}
+      </p>
+      <p v-if="selectedTimeRange === 'yearly'">Năm {{ selectedYear }}</p>
+      <p v-else>Toàn bộ các năm</p>
+    </div>
 
-  <div class="chart-container">
-    <template v-if="chartData.labels && chartData.labels.length > 0">
-      <Bar
-          v-if="selectedTimeRange === 'year'"
-          :key="`bar-${selectedYear}`"
-          :data="chartData"
-          :options="chartOptions"
-      />
-      <Line
-          v-else
-          :key="`line-${selectedMonth}-${selectedYear}`"
-          :data="chartData"
-          :options="chartOptions"
-      />
-
-    </template>
-    <div v-else class="loading">Đang tải dữ liệu...</div>
+    <div class="chart-container">
+      <template v-if="chartData.labels && chartData.labels.length > 0">
+        <Line
+            v-if="selectedTimeRange === 'monthly'"
+            :key="`line-${selectedYear}`"
+            :data="chartData"
+            :options="chartOptions"
+        />
+        <Bar
+            v-else
+            :key="`bar-${selectedYear}`"
+            :data="chartData"
+            :options="chartOptions"
+        />
+      </template>
+      <div v-else class="loading">Đang tải dữ liệu...</div>
+    </div>
   </div>
 </template>
 

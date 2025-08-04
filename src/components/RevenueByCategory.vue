@@ -1,32 +1,33 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { Pie } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import {valueOrDefault} from "chart.js/helpers";
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 const selectedYear = ref(new Date().getFullYear())
-const years = [2023, 2022, 2021, 2020]
-selectedYear.value= years[0];
-const categories = [
-  'Áo thun', 'Quần jeans', 'Váy', 'Áo sơ mi',
-  'Áo khoác', 'Giày dép', 'Phụ kiện', 'Đồ thể thao'
-]
+const years = ref([]);
+const categories = ref([])
 const totalRevenue = ref(0)
+
+// Generate a range of blue colors (25 shades)
+const generateBlueColors = (count) => {
+  const colors = []
+  for (let i = 0; i < count; i++) {
+    // Vary hue between 180-240 (blue to blue-green) and saturation between 50-100%
+    const hue = 180 + Math.floor((60 / count) * i)
+    const saturation = 50 + Math.floor((50 / count) * i)
+    colors.push(`hsl(${hue}, ${saturation}%, 60%)`)
+  }
+  return colors
+}
+
 const chartData = ref({
   labels: [],
   datasets: [
     {
-      backgroundColor: [
-        '#4285F4', // xanh đậm
-        '#63A9F9', // xanh trung
-        '#86BFFB', // xanh nhạt
-        '#A9D5FD', // xanh rất nhạt
-        '#36A2EB', // xanh aqua
-        '#4BC0C0', // xanh teal
-        '#5AD3D1', // xanh mint
-        '#B3E5FC'  // xanh baby blue
-      ],
+      backgroundColor: [],
       data: []
     }
   ]
@@ -57,30 +58,66 @@ const chartOptions = {
   }
 }
 
+const updateChartFromApiData = (apiData) => {
+  const labels = apiData.map(item => item.categoryName)
+  const data = apiData.map(item => item.revenue)
+  const colors = generateBlueColors(apiData.length)
 
-const generateRandomData = () => {
-  // Random data for each category
-  const data = categories.map(() => Math.floor(Math.random() * 50000000) + 10000000)
+  chartData.value = {
+    labels: labels,
+    datasets: [
+      {
+        backgroundColor: colors,
+        data: data
+      }
+    ]
+  }
 
-  chartData.value.labels = categories
-  chartData.value.datasets[0].data = data
   totalRevenue.value = data.reduce((a, b) => a + b, 0)
+  chartOptions.plugins.title.text = `Cơ cấu doanh thu theo danh mục năm ${selectedYear.value}`
 }
 
-const updateChartData = () => {
-  generateRandomData()
-}
-
-onMounted(() => {
-  generateRandomData()
+onMounted(async () => {
+  await getYears()
+  if (years.value.length > 0) {
+    selectedYear.value = years.value[0]
+    await getRevenueByCategory(selectedYear.value)
+  }
 })
+
+watch(selectedYear, async (newYear) => {
+  await getRevenueByCategory(newYear)
+})
+
+async function getYears() {
+  years.value = await api.get("/admin/dashboard/revenueByCategory/availableYears", {withCredentials: true})
+      .then(res => {
+        //console.log("available year: ", res.data)
+        return res.data
+      }).catch(error => {
+        //console.log(error)
+        return []
+      })
+}
+
+async function getRevenueByCategory(year) {
+  const resp = await api.get("/admin/dashboard/revenueByCategory?year="+year, {withCredentials: true})
+      .then(res => {
+        //console.log("Data: ", res.data)
+        updateChartFromApiData(res.data)
+        return res.data
+      }).catch(error => {
+        //console.log(error)
+        return []
+      })
+}
 </script>
 
 <template>
   <div class="filters">
     <div class="filter-group year-select">
       <label>Năm:</label>
-      <select v-model="selectedYear" @change="updateChartData">
+      <select v-model="selectedYear">
         <option v-for="year in years" :value="year">{{ year }}</option>
       </select>
     </div>
