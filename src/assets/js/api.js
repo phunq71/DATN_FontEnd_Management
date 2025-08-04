@@ -3,38 +3,30 @@
 
 api.interceptors.request.use(
     (config) => {
-
-        // Mấy đường này KHÔNG gắn token
         const skipAuthUrls = ["/auth/admin/login", "/auth/refresh"];
-        //console.log("Skip Auth URLs:", skipAuthUrls);
-
-        const isSkip = skipAuthUrls.some((url) =>
-            config.url.includes(url)
-        );
-        ////console.log("Is Skip:", isSkip);
+        const isSkip = skipAuthUrls.some((url) => config.url.includes(url));
 
         if (!isSkip) {
-            const token = getCookie("accessToken");
-            //console.log("Got Token From LocalStorage:", token);
+            const accessToken = getCookie("accessToken");
+            const refreshToken = getCookie("refreshToken"); // 👈 Lấy refresh token nếu có
 
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-                //console.log("Added Authorization Header:", config.headers.Authorization);
-            } else {
-                //console.log("No token found -> No Authorization header added");
+            if (accessToken) {
+                config.headers.Authorization = `Bearer ${accessToken}`;
             }
-        } else {
-            //console.log("This URL is in skip list -> No Authorization header added");
+
+            if (refreshToken) {
+                // 👇 Có thể gắn thêm custom header cho refresh token (nếu cần thiết)
+                config.headers.Authorization = `Bearer ${refreshToken}`;
+            }
         }
 
-        //console.log("==== INTERCEPTOR DONE ====");
         return config;
     },
     (error) => {
-        //console.log("INTERCEPTOR ERROR:", error);
         return Promise.reject(error);
     }
 );
+
 
 
 function getCookie(name) {
