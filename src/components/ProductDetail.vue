@@ -500,7 +500,7 @@ function getToday() {
 }
 function getNextVariantId() {
   if (!product.value || !product.value.listVariants || product.value.listVariants.length === 0) {
-    VaNew.value.id = 'pro0000001-01'; // mặc định
+    VaNew.value.id = productId + "-01"; // mặc định
     return;
   }
 
@@ -517,7 +517,7 @@ function getNextVariantId() {
   }, null);
 
   if (!maxId) {
-    VaNew.value.id = 'pro0000001-01';
+    VaNew.value.id = productId + "-01";
     return;
   }
 
@@ -664,7 +664,48 @@ async function deleteProduct(productId) {
 }
 
 // ======================== Xóa sản phẩm ===========================
+async function deleteVariant() {
+  if (!selectedVariant.value) return;
 
+  // Hỏi người dùng trước khi xóa
+  const result = await Swal.fire({
+    title: `Bạn có chắc muốn xóa biến thể "${selectedVariant.value.id}"?`,
+    text: "Hành động này không thể hoàn tác!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Xóa",
+    cancelButtonText: "Hủy"
+  });
+
+  if (!result.isConfirmed) return; // Người dùng bấm Hủy
+
+  try {
+    const id = selectedVariant.value.id;
+    const response = await api.delete(`/admin/variant/${id}`, { withCredentials: true });
+    showModal.value = false;
+    // Hiện thông báo thành công
+    await Swal.fire({
+      title: "Đã xóa!",
+      text: response.data, // backend trả "Xóa thành công variant ..."
+      icon: "success",
+      timer: 2000,
+      showConfirmButton: false
+    });
+    await fetchProduct();
+    return true;
+  } catch (error) {
+    // Xử lý lỗi
+    const errorMessage = error.response?.data || "Lỗi kết nối đến server!";
+    await Swal.fire({
+      title: "Không thể xóa!",
+      text: "Biến thể đang dùng trong nhiều đơn hàng, không nên xóa. Chỉ nên thay đổi trạng thái không hoạt động! ",
+      icon: "error"
+    });
+    return false;
+  }
+}
 </script>
 
 <template>

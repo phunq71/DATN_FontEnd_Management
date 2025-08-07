@@ -19,15 +19,15 @@
           <span>Quản lý đơn hàng</span>
         </router-link>
 
-        <router-link to="/banhang" class="menu-item">
-          <i class="fa-solid fa-receipt"></i>
-          <span>Bán hàng</span>
-        </router-link>
+<!--        <router-link to="/banhang" class="menu-item">-->
+<!--          <i class="fa-solid fa-receipt"></i>-->
+<!--          <span>Bán hàng</span>-->
+<!--        </router-link>-->
 
-        <div class="menu-item">
-          <i class="fa-solid fa-gift"></i>
-          <span>Khuyến mãi</span>
-        </div>
+<!--        <div class="menu-item">-->
+<!--          <i class="fa-solid fa-gift"></i>-->
+<!--          <span>Khuyến mãi</span>-->
+<!--        </div>-->
 
         <router-link to="/category" class="menu-item">
           <i class="fa-solid fa-folder"></i>
@@ -45,10 +45,10 @@
 
         </router-link>
 
-        <div class="menu-item">
-          <i class="fa-solid fa-lock"></i>
-          <span>Bảo mật</span>
-        </div>
+<!--        <div class="menu-item">-->
+<!--          <i class="fa-solid fa-lock"></i>-->
+<!--          <span>Bảo mật</span>-->
+<!--        </div>-->
 
         <router-link to="/dashboard" class="menu-item">
           <i class="fa-solid fa-chart-line"></i>
