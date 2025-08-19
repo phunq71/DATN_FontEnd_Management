@@ -2,9 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue</title>
+      <link rel="icon" href="/logo/Opulentia.jpg" type="image/x-icon">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opulentia - Quản trị</title>
       <!-- Thêm vào file index.html -->
       <link
               rel="stylesheet"
@@ -22,6 +22,22 @@
           const api = axios.create({
               baseURL: "http://localhost:8989",
           });
+
+          //ICON WEB
+          api.get('/logo/Opulentia.jpg', {
+              withCredentials: true,
+              responseType: 'blob'
+          })
+              .then(res => {
+                  const url = URL.createObjectURL(res.data);
+                  const link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+                  link.rel = 'icon';
+                  link.href = url;
+                  document.head.appendChild(link);
+              })
+              .catch(err => {
+                  console.error('Không load được favicon:', err);
+              });
 
       </script>
       <script src="/src/assets/js/api.js"></script>
