@@ -15,6 +15,7 @@ import StaffManagement from "../components/StaffManagement.vue";
 
 
 import Category from '../components/Category.vue';
+import MembershipManagement from "../components/MembershipManagement.vue";
 const routes = [
     {
         path: '/',
@@ -80,6 +81,11 @@ const routes = [
     {
         path: '/inventorySlips',
         component: InventorySlips,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/membership',
+        component: MembershipManagement,
         meta: {requiresAuth: true}
     }
 ]

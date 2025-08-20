@@ -65,6 +65,11 @@
           <span>Phiếu nhập/ xuất</span>
         </router-link>
 
+        <router-link to="/membership" class="menu-item">
+          <i class="fa-solid fa-medal"></i>
+          <span>Membership</span>
+        </router-link>
+
 
         <div class="menu-item" @click="toggleSubmenu('documents')">
           <i class="fas fa-file-alt"></i>
