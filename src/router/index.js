@@ -16,6 +16,7 @@ import StaffManagement from "../components/StaffManagement.vue";
 
 import Category from '../components/Category.vue';
 import MembershipManagement from "../components/MembershipManagement.vue";
+import CustomerManagement from "../components/CustomerManagement.vue";
 const routes = [
     {
         path: '/',
@@ -71,6 +72,11 @@ const routes = [
     {
         path: '/OrderManagement',
         component: OrderManagement,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/CustomerManagement',
+        component: CustomerManagement,
         meta: { requiresAuth: true }
     },
     {

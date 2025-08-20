@@ -15,7 +15,7 @@
 
 
         <router-link to="/OrderManagement" class="menu-item">
-         <i class="fas fa-box"></i>
+         <i class="fas fa-receipt"></i>
           <span>Quản lý đơn hàng</span>
         </router-link>
 
@@ -44,6 +44,11 @@
           <span>Quản lý nhân viên</span>
 
         </router-link>
+
+          <router-link to="/CustomerManagement" class="menu-item">
+            <i class="fas fa-handshake"></i>
+            <span>Quản lý khách hàng</span>
+          </router-link>
 
 <!--        <div class="menu-item">-->
 <!--          <i class="fa-solid fa-lock"></i>-->
