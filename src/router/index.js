@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from "../components/Home.vue";
 import BanHang from "../components/BanHang.vue";
-import OrderManagement from "../components/OrderManagement.vue";// 👈 import
+import OrderManagement from "../components/OrderManagement.vue";
 import Dashboard from "../components/Dashboard.vue";
+import InventoryManagement from "../components/InventoryManagement.vue";
+import InventorySlips from "../components/InventorySlips.vue";
 
 import Login from "../components/Login.vue";
 import Product from "../components/Product.vue";
@@ -13,6 +15,8 @@ import StaffManagement from "../components/StaffManagement.vue";
 import Facility from '../components/Facility.vue';
 
 import Category from '../components/Category.vue';
+import MembershipManagement from "../components/MembershipManagement.vue";
+import CustomerManagement from "../components/CustomerManagement.vue";
 const routes = [
     {
         path: '/',
@@ -75,6 +79,26 @@ const routes = [
         component: OrderManagement,
         meta: { requiresAuth: true }
     },
+    {
+        path: '/CustomerManagement',
+        component: CustomerManagement,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/inventory',
+        component: InventoryManagement,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/inventorySlips',
+        component: InventorySlips,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/membership',
+        component: MembershipManagement,
+        meta: {requiresAuth: true}
+    }
 ]
 
 const router = createRouter({
