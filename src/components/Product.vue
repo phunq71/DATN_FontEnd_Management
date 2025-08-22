@@ -156,6 +156,7 @@ async function getProductList() {
     totalPages.value = response.data.totalPages;
     console.log('✅✅✅✅✅', products.value)
     console.log(totalPages.value)
+    await fetchProductNew();
     return [];
   } catch (error) {
     console.error('Lỗi :', error);
@@ -246,8 +247,6 @@ onMounted(async () => {
 
 // =============================== Nút Search==================================
 const searchName = ref('');
-
-
 
 // ============================ Chuông ====================================
 const notificationCount = ref(0)
@@ -522,7 +521,7 @@ function goToProductConfig(productId) {
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Brand</label>
-                  <input type="text" v-model="product.brand" class="form-control" />
+                  <input type="text" style="text-transform: uppercase;" v-model="product.brand" class="form-control" />
                 </div>
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Category</label>
@@ -658,10 +657,11 @@ function goToProductConfig(productId) {
 
 <style scoped>
 .product-management {
-  padding: 0px;
-  padding-top: 5px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding:  30px;
+  padding-top: 25px;
+  width: 100%;         /* full width */
+  max-width: none;     /* bỏ giới hạn 1200px */
+  margin: 0;           /* bỏ căn giữa */
 }
 
 /* Header Row Styles */

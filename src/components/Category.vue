@@ -53,7 +53,6 @@
                 </option>
               </select>
             </div>
-            
             <div class="cm-form-actions">
               <button type="submit" class="cm-btn cm-btn-primary">
                 <i :class="isEdit ? 'fas fa-save' : 'fas fa-plus'"></i>
@@ -69,6 +68,31 @@
                 <i class="fas fa-trash-alt"></i> Xóa
               </button>
             </div>
+          </div>
+          <div class="cm-form-row">
+            <input
+                ref="fileInput"
+                type="file"
+                @change="onBannerChange"
+                accept="image/*"
+                hidden
+            />
+
+            <!-- Ảnh cũ hoặc ảnh preview -->
+            <img
+                :src="
+                previewBanner
+                  ? previewBanner
+                  : form.banner
+                    ? 'http://localhost:8989/uploads/' + form.banner
+                    : 'http://localhost:8989/uploads/null.png'
+              "
+                            alt="banner"
+                            class="banner clickable"
+                            @click="triggerFileSelect"
+            />
+
+            <textarea class="content" v-model="form.content" required></textarea>
           </div>
         </form>
       </div>
@@ -149,11 +173,26 @@ import Swal from 'sweetalert2'
 
 const categories = ref([])
 const flatCategoryList = ref([])
-const form = ref({ categoryID: '', categoryName: '', parentID: '' })
+const form = ref({ categoryID: '', categoryName: '', parentID: '', content: '', banner: ''})
 const isEdit = ref(false)
 const searchKeyword = ref('')
 const parentCategoryList = ref([])
 
+// Ảnh tạm
+const fileInput = ref(null);
+const previewBanner = ref(null);
+const newFile = ref(null);
+
+const triggerFileSelect = () => {
+  fileInput.value.click();
+};
+const onBannerChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    previewBanner.value = URL.createObjectURL(file);
+    newFile.value = file;
+  }
+};
 // Load dữ liệu danh mục
 const loadCategories = async () => {
   try {
@@ -182,12 +221,38 @@ const flattenTree = (tree, depth = 0) => {
 
 const saveCategory = async () => {
   try {
+    if (newFile.value === null && form.value.banner === '') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Thiếu ảnh',
+        text: 'Vui lòng thêm ảnh trước khi tiếp tục!',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    const fd = new FormData();
+
+// append JSON dưới dạng string
+    fd.append("category", JSON.stringify(form.value));
+
+// append file nếu có
+    if (newFile.value) {
+      fd.append("file", newFile.value);
+    }
+
     if (isEdit.value) {
-      await api.put(`/admin/category/${form.value.categoryID}`, form.value, { withCredentials: true })
-      showSuccess('Cập nhật danh mục thành công!')
+      await api.put(`/admin/category/${form.value.categoryID}`, fd, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      showSuccess("Cập nhật danh mục thành công!");
     } else {
-      await api.post('/admin/category', form.value, { withCredentials: true })
-      showSuccess('Thêm danh mục mới thành công!')
+      await api.post("/admin/category", fd, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      showSuccess("Thêm danh mục mới thành công!");
     }
     resetForm()
     await loadCategories()
@@ -197,7 +262,9 @@ const saveCategory = async () => {
 }
 
 const resetForm = () => {
-  form.value = { categoryID: '', categoryName: '', parentID: '' }
+  form.value = { categoryID: '', categoryName: '', parentID: '', content: '', banner: '' }
+  newFile.value = null
+  previewBanner.value = ''
   isEdit.value = false
 }
 
@@ -282,7 +349,7 @@ const showSuccess = (message) => {
 const showError = (message) => {
   Swal.fire({
     title: 'Lỗi!',
-    text: message,
+    text: "Thao tác này không được phép!",
     icon: 'error',
     confirmButtonText: 'OK',
     confirmButtonColor: '#ef4444'
@@ -637,6 +704,26 @@ onMounted(loadCategories)
 .cm-subcategory-actions {
   display: flex;
   gap: 8px;
+}
+.banner {
+  margin-top: 5px;
+  border-radius: 5px;
+  width: 300px;
+  border: solid 1px gray;
+  height: 150px;
+}
+.content {
+  margin-top: 5px;
+  border-radius: 5px;
+  border: solid 1px gray;
+  width: 500px;
+}
+.banner.clickable {
+  cursor: pointer;
+}
+.banner.clickable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive styles */
