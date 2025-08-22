@@ -10,7 +10,7 @@ import ProductDetail from "../components/ProductDetail.vue";
 import CreateProduct from "../components/CreateProduct.vue";
 
 import StaffManagement from "../components/StaffManagement.vue";
-
+import Facility from '../components/Facility.vue';
 
 import Category from '../components/Category.vue';
 const routes = [
@@ -56,6 +56,11 @@ const routes = [
     {
         path: '/category',
         component: Category,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/facility',
+        component: Facility,
         meta: { requiresAuth: true }
     },
     {
