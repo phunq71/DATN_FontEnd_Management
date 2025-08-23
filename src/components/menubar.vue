@@ -1,81 +1,6 @@
-<template>
-  <div>
-    <div :class="['sidebar', { open: isSidebarOpen }]">
-      <!-- Logo -->
-      <div class="logo-section">
-        <img src="/public/images/logo.png" alt="FinancePro Logo" class="logo-image" />
-      </div>
-
-      <!-- Menu -->
-      <div class="menu-items">
-        <router-link to="/home" class="menu-item">
-          <i class="fas fa-home"></i>
-          <span>Trang chủ</span>
-        </router-link>
-
-        <div class="menu-item" @click="toggleSubmenu('products')">
-          <i class="fas fa-box"></i>
-          <span>Quản lý Sản phẩm</span>
-          <i :class="['fas fa-chevron-down chevron', { open: isProductsOpen }]"></i>
-        </div>
-        <div class="submenu" :class="{ open: isProductsOpen }">
-          <div class="submenu-item">Danh mục sản phẩm</div>
-          <div class="submenu-item">Sản phẩm</div>
-        </div>
-
-        <router-link to="/banhang" class="menu-item">
-          <i class="fa-solid fa-receipt"></i>
-          <span>Bán hàng</span>
-        </router-link>
-
-        <div class="menu-item">
-          <i class="fa-solid fa-gift"></i>
-          <span>Khuyến mãi</span>
-        </div>
-
-        <div class="menu-item">
-          <i class="fa-solid fa-users"></i>
-          <span>Người dùng</span>
-        </div>
-
-        <div class="menu-item">
-          <i class="fa-solid fa-lock"></i>
-          <span>Bảo mật</span>
-        </div>
-
-        <router-link to="/dashboard" class="menu-item">
-          <i class="fa-solid fa-chart-line"></i>
-          <span>Thống kê</span>
-        </router-link>
-
-        <div class="menu-item" @click="toggleSubmenu('documents')">
-          <i class="fas fa-file-alt"></i>
-          <span>Tài liệu</span>
-          <i :class="['fas fa-chevron-down chevron', { open: isDocumentsOpen }]"></i>
-        </div>
-        <div class="submenu" :class="{ open: isDocumentsOpen }">
-          <div class="submenu-item">Hướng dẫn sử dụng</div>
-          <div class="submenu-item">Chính sách bảo mật</div>
-        </div>
-      </div>
-
-      <!-- Auth section -->
-      <div class="auth-section">
-        <div class="logo-container">
-          <img class="user-avatar ms-3" src="https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452" alt="User Avatar">&nbsp;
-          <b class="logo-text text-black text-white">{{props.displayName}}</b>
-        </div>
-        <div class="auth-item logout fw-bold" @click="emit('logout')">
-          <i class="fas fa-sign-out-alt"></i>
-          <span>Đăng xuất</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted  } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
@@ -95,7 +20,132 @@ function toggleSubmenu(menu) {
     isDocumentsOpen.value = !isDocumentsOpen.value;
   }
 }
+const isAdmin = ref(false);
+async function checkAdmin() {
+  try {
+    const response = await api.get('/admin/checkAdmin', { withCredentials: true });
+    return response.data === true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+onMounted(async () => {
+  isAdmin.value = await checkAdmin();
+  console.log( isAdmin.value);
+});
+
 </script>
+<template>
+  <div>
+    <div :class="['sidebar', { open: isSidebarOpen }]">
+      <!-- Logo -->
+      <div class="logo-section">
+        <img src="/public/images/logo.png" alt="FinancePro Logo" class="logo-image" />
+      </div>
+
+      <!-- Menu -->
+      <div class="menu-items">
+        <router-link to="/home" class="menu-item">
+          <i class="fas fa-home"></i>
+          <span>Trang chủ</span>
+        </router-link>
+
+
+        <router-link to="/OrderManagement" class="menu-item">
+         <i class="fas fa-receipt"></i>
+          <span>Quản lý đơn hàng</span>
+        </router-link>
+
+<!--        <router-link to="/banhang" class="menu-item">-->
+<!--          <i class="fa-solid fa-receipt"></i>-->
+<!--          <span>Bán hàng</span>-->
+<!--        </router-link>-->
+
+<!--        <div class="menu-item">-->
+<!--          <i class="fa-solid fa-gift"></i>-->
+<!--          <span>Khuyến mãi</span>-->
+<!--        </div>-->
+
+        <router-link to="/category" class="menu-item" v-if="isAdmin">
+          <i class="fa-solid fa-folder"></i>
+          <span>Quản lý danh mục</span>
+        </router-link>
+
+        <router-link to="/product" class="menu-item" v-if="isAdmin">
+          <i class="fas fa-box"></i>
+          <span>Quản lý sản phẩm</span>
+        </router-link>
+
+        <router-link to="/staffs" class="menu-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Quản lý nhân viên</span>
+
+        </router-link>
+
+          <router-link to="/CustomerManagement" class="menu-item">
+            <i class="fas fa-handshake"></i>
+            <span>Quản lý khách hàng</span>
+          </router-link>
+
+<!--        <div class="menu-item">-->
+<!--          <i class="fa-solid fa-lock"></i>-->
+<!--          <span>Bảo mật</span>-->
+<!--        </div>-->
+
+        <router-link to="/dashboard" class="menu-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Thống kê</span>
+        </router-link>
+
+        <router-link to="/facility" class="menu-item">
+          <i class="fa-solid fa-building"></i>
+          <span>Quản lý khu vực & cơ sở</span>
+        </router-link>
+
+        <router-link to="/inventory" class="menu-item">
+          <i class="fa-solid fa-warehouse"></i>
+          <span>Quản lý kho</span>
+        </router-link>
+
+        <router-link to="/inventorySlips" class="menu-item">
+          <i class="fa-solid fa-file"></i>
+          <span>Phiếu nhập/ xuất</span>
+        </router-link>
+
+        <router-link to="/membership" class="menu-item">
+          <i class="fa-solid fa-medal"></i>
+          <span>Membership</span>
+        </router-link>
+
+
+        <div class="menu-item" @click="toggleSubmenu('documents')">
+          <i class="fas fa-file-alt"></i>
+          <span>Tài liệu</span>
+          <i :class="['fas fa-chevron-down chevron', { open: isDocumentsOpen }]"></i>
+        </div>
+        <div class="submenu" :class="{ open: isDocumentsOpen }">
+          <div class="submenu-item">Hướng dẫn sử dụng</div>
+          <div class="submenu-item">Chính sách bảo mật</div>
+        </div>
+      </div>
+
+      <!-- Auth section -->
+      <div class="auth-section">
+        <div class="logo-container">
+
+          <b class="logo-text text-black text-white" style="margin-left: 20px;">{{props.displayName}}</b>
+        </div>
+        <div class="auth-item logout fw-bold" @click="emit('logout')">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Đăng xuất</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
 
 
 <style scoped>
@@ -191,6 +241,8 @@ function toggleSubmenu(menu) {
   color: #ffff;
   cursor: pointer;
   font-size: 14px;
+  display: block;
+  text-decoration: none;
 }
 
 .submenu-item:hover {

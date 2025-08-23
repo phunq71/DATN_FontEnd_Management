@@ -2,9 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue</title>
+      <link rel="icon" href="/logo/Opulentia.jpg" type="image/x-icon">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opulentia - Quản trị</title>
       <!-- Thêm vào file index.html -->
       <link
               rel="stylesheet"
@@ -16,14 +16,33 @@
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
       <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
       <script>
           // Giờ axios có sẵn là biến global
           const api = axios.create({
               baseURL: "https://datn1-eubngvadfdb4crgk.southeastasia-01.azurewebsites.net",
           });
 
+          //ICON WEB
+          api.get('/logo/Opulentia.jpg', {
+              withCredentials: true,
+              responseType: 'blob'
+          })
+              .then(res => {
+                  const url = URL.createObjectURL(res.data);
+                  const link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+                  link.rel = 'icon';
+                  link.href = url;
+                  document.head.appendChild(link);
+              })
+              .catch(err => {
+                  console.error('Không load được favicon:', err);
+              });
+
       </script>
       <script src="/src/assets/js/api.js"></script>
+
+
   </head>
 
   <body>

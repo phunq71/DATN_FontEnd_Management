@@ -3,9 +3,10 @@
 import RevenueByYear_Month from "./RevenueByYear_Month.vue";
 import RevenueByArea from "./RevenueByArea.vue";
 import RevenueByCategory from "./RevenueByCategory.vue";
-
+import RevenueByShop from "./RevenueByShop.vue";
 
 import { ref } from 'vue'
+
 
 // Tab đang chọn
 const activeTab = ref('year')
@@ -35,8 +36,17 @@ const activeTab = ref('year')
               :class="{ active: activeTab === 'category' }"
               @click="activeTab = 'category'"
           >
-            Doanh thu theo sản phẩm
+            Doanh thu theo danh mục
           </button>
+
+          <button
+              class="nav-link"
+              :class="{ active: activeTab === 'map' }"
+              @click="activeTab = 'map'"
+          >
+            Bản đồ doanh thu
+          </button>
+
         </div>
       </div>
     </nav>
@@ -45,6 +55,7 @@ const activeTab = ref('year')
       <RevenueByYear_Month v-if="activeTab === 'year'" />
       <RevenueByArea v-if="activeTab === 'area'" />
       <RevenueByCategory v-if="activeTab === 'category'" />
+      <RevenueByShop v-if="activeTab === 'map'"/>
     </div>
   </div>
 </template>
@@ -52,10 +63,11 @@ const activeTab = ref('year')
 <style scoped>
 .dashboard {
   font-family: Arial, sans-serif;
-  max-width: 1300px;
+  width: 100%;
   margin: 0 auto;
   padding: 20px;
   color: #333;
+  max-width: 95vw; /* co giãn theo màn hình */
 }
 
 h1 {
@@ -63,7 +75,7 @@ h1 {
   text-align: center;
   margin-bottom: 30px;
 }
-/* Thêm style cho navbar mới */
+
 .navbar {
   background: #f5f9ff;
   padding: 15px 0;
@@ -72,12 +84,13 @@ h1 {
 }
 
 .navbar-content {
-  max-width: 1300px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 95vw; /* chiếm 95% màn hình, không bị quá rộng */
 }
 
 .navbar-links {
@@ -119,8 +132,24 @@ h1 {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
+  .dashboard,
   .navbar-content {
+    max-width: 1140px;
+  }
+}
+
+@media (max-width: 992px) {
+  .dashboard,
+  .navbar-content {
+    max-width: 960px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard,
+  .navbar-content {
+    max-width: 720px;
     flex-direction: column;
   }
 
@@ -132,7 +161,12 @@ h1 {
   }
 }
 
-
+@media (max-width: 576px) {
+  .dashboard,
+  .navbar-content {
+    max-width: 540px;
+  }
+}
 
 
 </style>
