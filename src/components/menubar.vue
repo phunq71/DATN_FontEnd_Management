@@ -53,7 +53,7 @@ onMounted(async () => {
 
 
         <router-link to="/OrderManagement" class="menu-item">
-         <i class="fas fa-box"></i>
+         <i class="fas fa-receipt"></i>
           <span>Quản lý đơn hàng</span>
         </router-link>
 
@@ -83,6 +83,11 @@ onMounted(async () => {
 
         </router-link>
 
+          <router-link to="/CustomerManagement" class="menu-item">
+            <i class="fas fa-handshake"></i>
+            <span>Quản lý khách hàng</span>
+          </router-link>
+
 <!--        <div class="menu-item">-->
 <!--          <i class="fa-solid fa-lock"></i>-->
 <!--          <span>Bảo mật</span>-->
@@ -92,6 +97,27 @@ onMounted(async () => {
           <i class="fa-solid fa-chart-line"></i>
           <span>Thống kê</span>
         </router-link>
+
+        <router-link to="/facility" class="menu-item">
+          <i class="fa-solid fa-building"></i>
+          <span>Quản lý khu vực & cơ sở</span>
+        </router-link>
+
+        <router-link to="/inventory" class="menu-item">
+          <i class="fa-solid fa-warehouse"></i>
+          <span>Quản lý kho</span>
+        </router-link>
+
+        <router-link to="/inventorySlips" class="menu-item">
+          <i class="fa-solid fa-file"></i>
+          <span>Phiếu nhập/ xuất</span>
+        </router-link>
+
+        <router-link to="/membership" class="menu-item">
+          <i class="fa-solid fa-medal"></i>
+          <span>Membership</span>
+        </router-link>
+
 
         <div class="menu-item" @click="toggleSubmenu('documents')">
           <i class="fas fa-file-alt"></i>
