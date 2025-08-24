@@ -31,7 +31,7 @@ async function checkAuth() {
 }
 
 async function logout() {
-  await api.get("/logout");
+  await api.post("/api/auth/logout2",{},{ withCredentials: true });
   isAuthenticated.value = false;
   displayName.value = "";
   router.push('/login');

@@ -1,3 +1,41 @@
+
+<script setup>
+import { ref, onMounted  } from 'vue';
+import { defineProps, defineEmits } from 'vue';
+
+const props = defineProps({
+  isSidebarOpen: Boolean,
+  displayName: String
+});
+
+const emit = defineEmits(['logout']);
+
+const isProductsOpen = ref(false);
+const isDocumentsOpen = ref(false);
+
+function toggleSubmenu(menu) {
+  if (menu === 'products') {
+    isProductsOpen.value = !isProductsOpen.value;
+  } else if (menu === 'documents') {
+    isDocumentsOpen.value = !isDocumentsOpen.value;
+  }
+}
+const isAdmin = ref(false);
+async function checkAdmin() {
+  try {
+    const response = await api.get('/admin/checkAdmin', { withCredentials: true });
+    return response.data === true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+onMounted(async () => {
+  isAdmin.value = await checkAdmin();
+  console.log( isAdmin.value);
+});
+
+</script>
 <template>
   <div>
     <div :class="['sidebar', { open: isSidebarOpen }]">
@@ -29,12 +67,12 @@
 <!--          <span>Khuyến mãi</span>-->
 <!--        </div>-->
 
-        <router-link to="/category" class="menu-item">
+        <router-link to="/category" class="menu-item" v-if="isAdmin">
           <i class="fa-solid fa-folder"></i>
           <span>Quản lý danh mục</span>
         </router-link>
 
-        <router-link to="/product" class="menu-item">
+        <router-link to="/product" class="menu-item" v-if="isAdmin">
           <i class="fas fa-box"></i>
           <span>Quản lý sản phẩm</span>
         </router-link>
@@ -60,6 +98,11 @@
           <span>Thống kê</span>
         </router-link>
 
+        <router-link to="/facility" class="menu-item">
+          <i class="fa-solid fa-building"></i>
+          <span>Quản lý khu vực & cơ sở</span>
+        </router-link>
+
         <router-link to="/inventory" class="menu-item">
           <i class="fa-solid fa-warehouse"></i>
           <span>Quản lý kho</span>
@@ -70,9 +113,15 @@
           <span>Phiếu nhập/ xuất</span>
         </router-link>
 
+
         <router-link to="/VouchersManagement" class="menu-item">
           <i class="fas fa-tags"></i>
           <span>Quản lý khuyến mãi</span>
+        </router-link>
+        <router-link to="/membership" class="menu-item">
+          <i class="fa-solid fa-medal"></i>
+          <span>Membership</span>
+
         </router-link>
 
 
@@ -102,28 +151,7 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { defineProps, defineEmits } from 'vue';
 
-const props = defineProps({
-  isSidebarOpen: Boolean,
-  displayName: String
-});
-
-const emit = defineEmits(['logout']);
-
-const isProductsOpen = ref(false);
-const isDocumentsOpen = ref(false);
-
-function toggleSubmenu(menu) {
-  if (menu === 'products') {
-    isProductsOpen.value = !isProductsOpen.value;
-  } else if (menu === 'documents') {
-    isDocumentsOpen.value = !isDocumentsOpen.value;
-  }
-}
-</script>
 
 
 <style scoped>

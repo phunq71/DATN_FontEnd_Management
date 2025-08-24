@@ -12,9 +12,10 @@ import ProductDetail from "../components/ProductDetail.vue";
 import CreateProduct from "../components/CreateProduct.vue";
 
 import StaffManagement from "../components/StaffManagement.vue";
-
+import Facility from '../components/Facility.vue';
 
 import Category from '../components/Category.vue';
+import MembershipManagement from "../components/MembershipManagement.vue";
 import CustomerManagement from "../components/CustomerManagement.vue";
 
 import VouchersManagement from '../components/VouchersManagement.vue';
@@ -64,6 +65,11 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
+        path: '/facility',
+        component: Facility,
+        meta: { requiresAuth: true }
+    },
+    {
         path: '/login',
         components: {
             auth: Login
@@ -91,10 +97,16 @@ const routes = [
         meta: {requiresAuth: true}
     },
     {
+
         path: '/VouchersManagement',
         component: VouchersManagement,
         meta: {requiresAuth: true}
     },
+    {
+        path: '/membership',
+        component: MembershipManagement,
+        meta: {requiresAuth: true}
+    }
 ]
 
 const router = createRouter({

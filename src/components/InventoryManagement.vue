@@ -338,14 +338,12 @@ function setupWatchers() {
 .inventory-page {
   padding: 20px;
   font-family: Arial, sans-serif;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
 .page-title {
   color: #2c3e50;
   margin-bottom: 20px;
-  text-align: center;
   font-size: 36px;
 }
 

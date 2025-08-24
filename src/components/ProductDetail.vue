@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import colorData from '../assets/data/Color.json'
+
 const colorOptions = ref([])
 const flagCreate = ref(false);
 
@@ -55,6 +56,8 @@ async function fetchProduct() {
     console.log(sizeCodes);
     await fetchSizes();
     getNextVariantId();
+
+
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy Pro:', error);
@@ -255,14 +258,14 @@ async function submitSizeConfig(){
   try {
     const response = await api.post(url, {
       selectedSizeId: selectedSizeId.value,
-      selectedVariantIds: selectedVariantIds.value
+      selectedVariantIds: [...selectedVariantIds.value]
     }, {
       withCredentials: true
     });
     msg.value = '';
     showAddSizeModal.value = false;
     selectedSizeId.value = null;
-    selectedVariantIds.value = null;
+    selectedVariantIds.value = [];
     await fetchProduct();
     Swal.fire({
       icon: 'success',
@@ -308,20 +311,47 @@ const handleImageUpload = (event) => {
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
     const reader = new FileReader()
+
     reader.onload = (e) => {
-      selectedVariant.value.images.push({
-        isNew: true,
-        file,
-        preview: e.target.result,
-        isMain: false // mặc định không phải ảnh chính
-      })
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+
+        // Convert sang WebP (85% quality)
+        canvas.toBlob(
+            (blob) => {
+              const webpFile = new File(
+                  [blob],
+                  file.name.replace(/\.\w+$/, '.webp'),
+                  { type: 'image/webp' }
+              )
+
+              // Thêm vào danh sách ảnh
+              selectedVariant.value.images.push({
+                isNew: true,
+                file: webpFile,
+                preview: URL.createObjectURL(webpFile),
+                isMain: false
+              })
+            },
+            'image/webp',
+            0.85
+        )
+      }
+      img.src = e.target.result
     }
+
     reader.readAsDataURL(file)
   }
 
   // Reset input để có thể chọn lại cùng file
   event.target.value = null
 }
+
 
 const setMainImage = (index) => {
   selectedVariant.value.images.forEach((img, i) => {
@@ -478,18 +508,16 @@ async function closeModel(){
   return [];
 }
 
-async function reset(){
-  selectedVariant.value = {
-    id: '',
-    color: 'Đen',
-    createdDate: getToday(),
-    description: '',
-    discount: 0,
-    price: 1000,
-    isMainVariant: false,
-    isUse: true,
-    images: []
-  }
+async function reset() {
+  selectedVariant.value.id = ''
+  selectedVariant.value.color = 'Đen'
+  selectedVariant.value.createdDate = getToday()
+  selectedVariant.value.description = ''
+  selectedVariant.value.discount = 0
+  selectedVariant.value.price = 1000
+  selectedVariant.value.isMainVariant = false
+  selectedVariant.value.isUse = true
+  selectedVariant.value.images.splice(0) // xóa toàn bộ phần tử trong mảng
 }
 
 
@@ -584,6 +612,14 @@ async function crateVariant(){
       console.log(`${key}: ${value}`);
     }
   }
+  let totalSize = 0;
+  for (let [key, value] of formData.entries()) {
+    if (value instanceof File) {
+      console.log(`${key}: ${value.name} (${(value.size / (1024*1024)).toFixed(2)} MB)`);
+      totalSize += value.size;
+    }
+  }
+  console.log(`📦 Tổng dung lượng tất cả file: ${(totalSize / (1024*1024)).toFixed(2)} MB`);
   try {
     const url = '/admin/variant/add';
 
@@ -605,7 +641,6 @@ async function crateVariant(){
       text: 'Hệ thống đã ghi nhận biến thể mới !',
       confirmButtonText: 'OK'
     });
-
   } catch (error) {
     console.error('Lỗi khi cập nhật:', error);
 
@@ -679,28 +714,37 @@ async function deleteVariant() {
     cancelButtonText: "Hủy"
   });
 
+
   if (!result.isConfirmed) return; // Người dùng bấm Hủy
 
   try {
     const id = selectedVariant.value.id;
     const response = await api.delete(`/admin/variant/${id}`, { withCredentials: true });
     showModal.value = false;
-    // Hiện thông báo thành công
-    await Swal.fire({
-      title: "Đã xóa!",
-      text: response.data, // backend trả "Xóa thành công variant ..."
-      icon: "success",
-      timer: 2000,
-      showConfirmButton: false
-    });
     await fetchProduct();
+    // Hiện thông báo thành công
+    if (typeof response.data === 'string' && response.data.startsWith("Xóa")) {
+      await Swal.fire({
+        title: "Đã xóa!",
+        text: response.data,
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } else {
+      await Swal.fire({
+        title: "Không thể xóa!",
+        text: response.data || "Có lỗi xảy ra!",
+        icon: "error"
+      });
+    }
     return true;
   } catch (error) {
     // Xử lý lỗi
     const errorMessage = error.response?.data || "Lỗi kết nối đến server!";
     await Swal.fire({
       title: "Không thể xóa!",
-      text: "Biến thể đang dùng trong nhiều đơn hàng, không nên xóa. Chỉ nên thay đổi trạng thái không hoạt động! ",
+      text: "Biến thể đang dùng trong nhiều đơn hàng/ là biến thể chính! ",
       icon: "error"
     });
     return false;
@@ -752,7 +796,7 @@ async function deleteVariant() {
 
         <div class="info-row">
           <span class="label">Brand:</span>
-          <input type="text" v-model="product.brand" class="value" />
+          <input type="text" style="text-transform: uppercase;" v-model="product.brand" class="value" />
         </div>
 
         <div class="info-row">
@@ -1022,9 +1066,9 @@ async function deleteVariant() {
 
       <div class="modal-form">
         <!-- Select chọn size -->
-        <div class="form-group">
+        <div class="form-group" style="padding-bottom: 10px">
           <label>Chọn size:</label>
-          <select v-model="selectedSizeId" class="w-full border p-2 rounded">
+          <select v-model="selectedSizeId" class="w-full border p-2 rounded" style="margin-left: 22px">
             <option v-for="size in listSizeNew" :key="size.sizeID" :value="size.sizeID">
               {{ size.code }}
             </option>
@@ -1055,9 +1099,11 @@ async function deleteVariant() {
 
 <style scoped>
 .product-detail {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+    padding:  30px;
+    padding-top: 25px;
+    width: 100%;         /* full width */
+    max-width: none;     /* bỏ giới hạn 1200px */
+    margin: 0;           /* bỏ căn giữa */
 }
 
 h1, h2, h3 {

@@ -3,6 +3,7 @@
     <!-- Filter Section -->
     <div class="filter-section">
       <div class="filter-row">
+        <span style="font-size: 34px; font-weight: bolder; left: 20px; position: absolute;"> Quản lý đơn hàng </span>
         <div v-if="activeTab === 'SanSangGiao'" class="pickup-filter">
           <select
               v-model="pickupStatus"
@@ -18,12 +19,20 @@
         </select>
 
         <select v-model="filters.store" class="filter-select" :disabled="filteredStores.length < 2">
-          <option value="">Tất cả shop</option>
           <option v-for="store in filteredStores" :key="store.id" :value="store.id">
             {{ store.name }}
           </option>
         </select>
-        <input type="date" v-model="filters.day" class="filter-select" />
+        <VueDatePicker
+            class="filter-select"
+            style="width: 280px"
+            v-model="filters.day"
+            range
+            placeholder="Từ ngày - Đến ngày"
+            :enable-time-picker="false"
+            :format="customFormat"
+        />
+
         <input
             type="text"
             v-model="filters.orderId"
@@ -55,13 +64,12 @@
               <th>Mã đơn</th>
               <th>Ngày đặt hàng</th>
               <th>Trạng thái</th>
-              <th>Tỉnh giao</th>
+              <th>Địa chỉ giao</th>
+              <th>NG dự kiến (+1)</th>
               <th>Loại đơn</th>
               <th>Khách hàng</th>
-              <th>Nhân viên</th>
-              <th>Cập nhật đơn</th>
-              <th>Loại GD</th>
-              <th>Ngày GD</th>
+              <th>Hình thức TT</th>
+              <th>Ngày TT</th>
               <th>Thành tiền</th>
               <th>Trạng thái GHN</th>
               <th>Thời gian cập nhật đơn GHN</th>
@@ -79,12 +87,11 @@
             </span>
             </td>
             <td>{{ order.shippingAddress }}</td>
+            <td>{{ order.delivery || '---'}}</td>
             <td>{{ order.isOnline ? 'Online' : 'Trực tiếp' }}</td>
             <td>{{ order.customerName }}</td>
-            <td>{{ order.staffName }}</td>
-            <td>{{ formatDate(order.updatedStatusAt) }}</td>
-            <td>{{ order.transactionType || '---' }}</td> <!-- nếu có -->
-            <td>{{ formatDate(order.transactionDate) }}</td>
+            <td>{{ order.paymentMethod || '---' }}</td> <!-- nếu có -->
+            <td>{{ formatDateTime(order.transactionDate) || '---' }}</td>
             <td>{{ formatCurrency(order.totalAmount) }}</td>
             <td>{{ order.statusGHN}}</td>
             <td>{{ formatDateTime(order.updatedTimeGHN)}}</td>
@@ -125,66 +132,86 @@
           <h3>Chi tiết đơn hàng {{ selectedOrder.OrderID }}</h3>
           <button @click="closeModal" class="close-modal">&times;</button>
         </div>
-
         <div class="modal-body">
           <!-- Thông tin đơn hàng -->
           <div class="detail-section">
             <h4>Thông tin đơn hàng</h4>
-            <div class="detail-grid">
-              <div class="detail-item">
-                <label><strong>Mã đơn:</strong></label>
-                <label>{{ selectedOrder.OrderID }}</label>
+            <div class="row">
+              <div class="detail-grid" style="width: 60%">
+                <div class="detail-item">
+                  <label><strong>Mã đơn:</strong></label>
+                  <label>{{ selectedOrder.OrderID }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Ngày đặt:</strong></label>
+                  <label>{{ formatDateTime(selectedOrder.OrderDate) }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Địa chỉ giao:</strong></label>
+                  <label>{{ selectedOrder.ShippingAddress }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Ghi chú:</strong></label>
+                  <label>{{ selectedOrder.Note || 'Không có' }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Loại đơn:</strong></label>
+                  <label>{{ selectedOrder.IsOnline ? 'Online' : 'Trực tiếp' }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Phương thức VC:</strong></label>
+                  <label>{{ selectedOrder.ShipMethod }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Khách hàng:</strong></label>
+                  <label>{{ selectedOrder.CustomerName }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Cửa hàng:</strong></label>
+                  <label>{{ selectedOrder.FacilityName }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Ngày giao dự kiến cho khách (+1):</strong></label>
+                  <label>{{ selectedOrder.delivery }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Địa chỉ GHN:</strong></label>
+                  <label>{{ selectedOrder.AddressIdGHN || 'Không có' }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Mã đơn hàng GHN:</strong></label>
+                  <label>{{ selectedOrder.shippingCode || 'Không có' }}</label>
+                </div>
+                <div class="detail-item">
+                  <label><strong>Thời gian GHN cập nhật:</strong></label>
+                  <label>{{ selectedOrder.updatedTimeGHN || 'Không có' }}</label>
+                </div>
               </div>
-              <div class="detail-item">
-                <label><strong>Ngày đặt:</strong></label>
-                <label>{{ formatDateTime(selectedOrder.OrderDate) }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Trạng thái:</strong></label>
-                <label>{{ selectedOrder.Status}}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Địa chỉ giao:</strong></label>
-                <label>{{ selectedOrder.ShippingAddress }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Ghi chú:</strong></label>
-                <label>{{ selectedOrder.Note || 'Không có' }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Loại đơn:</strong></label>
-                <label>{{ selectedOrder.IsOnline ? 'Online' : 'Trực tiếp' }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Phương thức VC:</strong></label>
-                <label>{{ selectedOrder.ShipMethod }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Khách hàng:</strong></label>
-                <label>{{ selectedOrder.CustomerName }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Nhân viên:</strong></label>
-                <label>{{ selectedOrder.StaffName }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Cửa hàng:</strong></label>
-                <label>{{ selectedOrder.FacilityName }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Cập nhật đơn:</strong></label>
-                <label>{{ selectedOrder.UpdatedAt }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Mã GHN:</strong></label>
-                <label>{{ selectedOrder.AddressIdGHN || 'Không có' }}</label>
-              </div>
-              <div class="detail-item">
-                <label><strong>Mã đơn hàng GHN:</strong></label>
-                <label>{{ selectedOrder.shippingCode || 'Không có' }}</label>
+              <div style="width: 40%" v-if="selectedOrder.logOrders != null && selectedOrder.logOrders.length > 0">
+                <label><strong>Lịch sử trạng thái:</strong></label>
+                <table class="table-auto border border-gray-300 w-full" style="font-size: 14px">
+                  <thead class="bg-gray-100">
+                  <tr>
+                    <th class="border border-gray-300 px-2 py-1 text-center">Thời gian</th>
+                    <th class="border border-gray-300 px-2 py-1">Nội dung</th>
+                    <th class="border border-gray-300 px-2 py-1">Nhân viên</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr v-for="(log, index) in selectedOrder.logOrders" :key="index">
+                    <td class="border border-gray-300 px-2 py-1 text-center">
+                      {{ formatDateTime(log.updateAt) }}
+                    </td>
+                    <td class="border border-gray-300 px-2 py-1">{{ log.content }}</td>
+                    <td class="border border-gray-300 px-2 py-1">{{ log.staffName }}</td>
+                  </tr>
+                  </tbody>
+                </table>
+
               </div>
             </div>
-          </div>
+            </div>
+
 
           <!-- Thông tin sản phẩm -->
           <div class="detail-section">
@@ -313,6 +340,9 @@
             <div class="action-buttons" v-else-if="selectedOrder.Status === 'Chuẩn bị đơn'">
               <button @click="markReadyToShip" class="confirm-btn">Sẵn sàng giao</button>
             </div>
+            <div class="action-buttons" v-else-if="selectedOrder.Status === 'Yêu cầu hủy'">
+              <button @click="chapnhanHuy(selectedOrder.OrderID, $event)" class="confirm-btn">Chấp nhận hủy</button>
+            </div>
           </div>
       </div>
     </div>
@@ -322,15 +352,17 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import tab from "bootstrap/js/src/tab.js";
-
+import popover from "bootstrap/js/src/popover.js";
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+import qs from 'qs';
 
 // Filter data
 const filters = ref({
   orderType: 'all',
   area: '',
   store: '',
-  day: '',
+  day: [],
   search: '',
   status: '',
   orderId: ''
@@ -339,7 +371,6 @@ const filters = ref({
 
 const today = new Date();
 const pad = (n) => String(n).padStart(2, '0');
-filters.value.day = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 const areas = ref([]);
 
 const stores = ref([]);
@@ -350,7 +381,9 @@ const tabs = ref([
   { id: 'ChoXacNhan', label: 'Chờ xác nhận' },
   { id: 'SanSangGiao', label: 'Chờ lấy hàng' },
   { id: 'ChoGiaoHang', label: 'Chờ giao hàng' },
-  { id: 'DaGiao', label: 'Đơn hàng thành công' }
+  { id: 'DaGiao', label: 'Đơn hàng thành công' },
+  { id: 'DaHuy', label: 'Đã hủy' },
+  { id: 'YeuCauHuy', label: 'Yêu cầu hủy' }
 ]);
 
 const activeTab = ref('ChoXacNhan');
@@ -368,7 +401,7 @@ const rejectReason = ref('');
 // Lấy dữ liệu từ backend
 const getFacilities = async () => {
   try {
-    const res = await api.get("/opulentia_admin/area", { withCredentials: true });
+    const res = await api.get("/admin/area", { withCredentials: true });
     rawFacilities.value = res.data;
     // Tách danh sách khu vực (duy nhất)
     const uniqueAreas = [...new Map(
@@ -398,60 +431,61 @@ const selectTab = (tabId) => {
     filters.value.status = tabId; // Dùng giá trị tab cho các tab khác
   }
 };
+
+function formatDate1(date) {
+  if (!date) return null;
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+let requestId = 0; // biến toàn cục trong component
+
 const getOrders = async () => {
-  let loading;
+  const currentRequestId = ++requestId; // gán ID cho request này
 
   try {
-    // Hiển thị modal loading
-    loading = Swal.fire({
-      title: 'Đang lấy dữ liệu',
-      html: 'Vui lòng chờ trong giây lát...',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      allowEnterKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    console.log("Filters gửi BE:", {
-      orderId: filters.value.orderId,
-      areaId: filters.value.area,
-      storeId: filters.value.store,
-      day: filters.value.day,
-      status: filters.value.status || null,
-      orderType: filters.value.orderType !== 'all' ? filters.value.orderType : null,
-      search: filters.value.search
-    });
-
-    const res = await api.get(`/opulentia_admin/order/${currentPage.value - 1}`, {
+    const res = await api.get(`/admin/order/${currentPage.value - 1}`, {
       withCredentials: true,
       params: {
         areaId: filters.value.area || null,
         storeId: filters.value.store || null,
-        day: filters.value.day || null,
+        day: filters.value.day && filters.value.day.length > 0
+            ? filters.value.day.map(d => formatDate1(d))
+            : null,
         status: filters.value.status || null,
         orderType: filters.value.orderType !== 'all' ? filters.value.orderType : null,
         search: filters.value.search || null,
         orderId: filters.value.orderId || null
-      }
+      },
+      paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })
     });
 
-    orders.value = res.data.content;
-    totalPages.value = res.data.totalPages;
+    // ✅ chỉ update nếu đây là request mới nhất
+    if (currentRequestId === requestId) {
+      console.log("Response từ BE:", res.data);
+      orders.value = res.data.content ?? [];
+      totalPages.value = res.data.totalPages ?? 0;
+    } else {
+      console.log("⚠️ Bỏ qua response cũ:", res.data);
+    }
+
   } catch (error) {
-    console.error("Lỗi khi tải đơn hàng:", error);
-    orders.value = [];
-    Swal.fire({
-      icon: 'error',
-      title: 'Lỗi tải dữ liệu',
-      text: 'Không thể tải danh sách đơn hàng. Vui lòng thử lại sau!'
-    });
+    if (currentRequestId === requestId) {
+      console.error("Lỗi khi tải đơn hàng:", error);
+      orders.value = [];
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi tải dữ liệu',
+        text: 'Không thể tải danh sách đơn hàng. Vui lòng thử lại sau!'
+      });
+    }
   } finally {
-    // Đóng modal loading (nếu đang mở)
-    Swal.close();
+    if (currentRequestId === requestId) {
+      Swal.close();
+    }
   }
 };
+
 //TRÌ HOẢNG
 function debounce(func, delay) {
   let timer;
@@ -634,7 +668,7 @@ const markReadyToShip = async () => {
     })),
   };
   try {
-    const res = await api.post('/opulentia_admin/order/ready-to-ship', ghnPayload, {
+    const res = await api.post('/admin/order/ready-to-ship', ghnPayload, {
       withCredentials: true
     });
 
@@ -643,8 +677,10 @@ const markReadyToShip = async () => {
       icon: 'success',
       title: 'Đơn hàng đã được gửi!',
       text: 'Hệ thống giao hàng đã nhận đơn.'
+
     }).then(() => {
        // Sau khi người dùng bấm "OK" thì gọi lại danh sách đơn
+       closeModal();
        getOrders();  // 👈 Thêm dòng này
      });
   } catch (error) {
@@ -659,18 +695,30 @@ const markReadyToShip = async () => {
 
 // ----------------------Fillter khu vực, ngày tháng (Lọc)
 const filteredStores = ref([]);
-watch(() => filters.value.area, (newAreaId) => {
-  if (!newAreaId) {
-    filteredStores.value = stores.value;
-  } else {
-    filteredStores.value = stores.value.filter(store => store.areaId === newAreaId);
-  }
 
-  // Reset lại lựa chọn cửa hàng nếu không thuộc khu vực mới
-  if (!filteredStores.value.find(store => store.id === filters.value.store)) {
-    filters.value.store = '';
-  }
-});
+watch(
+    () => filters.value.area,
+    (newAreaId) => {
+      if (!newAreaId) {
+        filteredStores.value = stores.value;
+      } else {
+        filteredStores.value = stores.value.filter(
+            (store) => store.areaId === newAreaId
+        );
+      }
+
+      // Nếu cửa hàng hiện tại không còn hợp lệ => chọn mặc định cái đầu tiên
+      if (!filteredStores.value.find((store) => store.id === filters.value.store)) {
+        filters.value.store = filteredStores.value.length > 0 ? filteredStores.value[0].id : '';
+
+      }
+
+      getOrders();
+    },
+    { immediate: true }
+    // để chạy luôn khi component mount
+);
+
 watch(() => currentPage.value, () => {
   getOrders();
 });
@@ -724,9 +772,11 @@ function showOrderDetail(order) {
     totalAmount: order.totalAmount||null,
     transactionDate: order.transactionDate || null,
     numberPhone: order.numberPhone || null,
+    delivery: order.delivery || null,
     addressIDGHN_Shop: order.addressIDGHN_Shop || null,
     statusGHN: order.statusGHN || null,
     updatedTimeGHN: order.updatedTimeGHN || null,
+    logOrders: order.logOrders || null,
     Products: (order.products || []).map(p => {
       const price = p.originalPrice * (1 - p.discountPercent / 100);
       return {
@@ -780,7 +830,7 @@ async function confirmOrder() {
     });
 
     // Gửi request xác nhận đơn hàng
-    await api.post('/opulentia_admin/order/confirm', {
+    await api.post('/admin/order/confirm', {
       orderID: selectedOrder.value.OdID
     }, { withCredentials: true });
 
@@ -812,32 +862,78 @@ async function confirmOrder() {
     });
   }
 }
+const customFormat = (dates) => {
+  if (!dates) return "";
+  if (Array.isArray(dates)) {
+    const [start, end] = dates;
+    if (start && !end) {
+      return start.toLocaleDateString("vi-VN"); // chỉ hiển thị ngày start
+    }
+    if (start && end) {
+      return `${start.toLocaleDateString("vi-VN")} - ${end.toLocaleDateString("vi-VN")}`;
+    }
+  }
+  return "";
+};
 
 
 
-function rejectOrder() {
+async function rejectOrder() {
   if (!rejectReason.value.trim()) {
-    alert('Vui lòng nhập lý do từ chối');
+    await Swal.fire({
+      title: "Thiếu lý do",
+      text: "Vui lòng nhập lý do từ chối",
+      icon: "warning",
+      confirmButtonText: "OK"
+    });
     return;
   }
 
-  if (selectedOrder.value) {
-    // Update order status to rejected
-    selectedOrder.value.Status = 'Đã từ chối';
+  if (!selectedOrder.value) return;
+
+  try {
+    api.put(
+        "/admin/orders11/reject",
+        { orderId: selectedOrder.value.OrderID, reason: rejectReason.value },
+        { withCredentials: true, headers: { "Content-Type": "application/json" } }
+    );
+
+    // ✅ Cập nhật local state
+    selectedOrder.value.Status = "Đã từ chối";
     selectedOrder.value.Note = `Lý do từ chối: ${rejectReason.value}`;
 
-    // Find and update the order in the orders array
     const index = orders.value.findIndex(o => o.OrderID === selectedOrder.value.OrderID);
     if (index !== -1) {
       orders.value[index] = { ...selectedOrder.value };
     }
 
-    alert(`Đã từ chối đơn hàng ${selectedOrder.value.OrderID}`);
+    await Swal.fire({
+      title: "Thành công!",
+      text: `Đã từ chối đơn hàng ${selectedOrder.value.OrderID}`,
+      icon: "success",
+      confirmButtonText: "OK"
+    });
+
     showModal.value = false;
     showRejectReason.value = false;
-    rejectReason.value = '';
+    rejectReason.value = "";
+    activeTab.value = 'DaHuy';
+    filters.value.status = 'DaHuy'
+
+
+  } catch (err) {
+    console.error("Lỗi khi từ chối đơn:", err);
+    await Swal.fire({
+      title: "Thất bại!",
+      text: err.response?.data || "Không thể từ chối đơn",
+      icon: "error",
+      confirmButtonText: "OK"
+    });
   }
 }
+
+
+
 
 function formatDate(dateString) {
   if (!dateString) return '';
@@ -866,13 +962,48 @@ const statusMap = {
   ChoGiaoHang: 'Chờ giao hàng',
   DaGiao: 'Đơn hàng thành công',
   DaHuy: 'Đã hủy',
-  DaYeuCauHuy: 'Đã yêu cầu hủy',
+  YeuCauHuy: 'Yêu cầu hủy',
 };
 
+async function chapnhanHuy(orderId, event) {
+  const btn = event.currentTarget
+  try {
+    const res = await api.post('/admin/order/cancelOrderCustomer', { orderId }
+        , { withCredentials: true })
+
+    await Swal.fire({
+      title: "Thành công",
+      text: "Đã chấp nhận hủy đơn!",
+      icon: "success",
+      confirmButtonText: "OK"
+    })
+
+    // Disable nút và update UI
+    btn.disabled = true
+    btn.textContent = "Đã chấp nhận"
+
+    // Tắt tab hiện tại
+    const currentTab = document.getElementById("yeu-cau-huy")
+    if (currentTab) currentTab.classList.remove("active")
+
+    // Cập nhật danh sách đơn
+    showModal.value = false;
+    showRejectReason.value = false;
+    rejectReason.value = "";
+    activeTab.value = 'DaHuy';
+    filters.value.status = 'DaHuy'
 
 
-
-// Initialize with the first order selected
+  } catch (err) {
+    console.error(err)
+    Swal.fire({
+      title: "Lỗi",
+      text: "Không thể chấp nhận hủy đơn.",
+      icon: "error",
+      confirmButtonText: "OK"
+    })
+  }
+}
 
 </script>
 
@@ -1156,17 +1287,9 @@ const statusMap = {
   font-size: 16px;
 }
 
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 15px;
-}
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+.detail-item { display: flex; flex-direction: column; font-size: 14px; }
 
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  font-size: 14px;
-}
 
 .detail-item label:first-child {
   font-weight: 500;
@@ -1259,7 +1382,8 @@ const statusMap = {
 }
 
 .reject-reason-input {
-  margin-bottom: 15px;
+  margin-right: 10px;
+  width: 500px;
 }
 
 .reject-reason-input label {
@@ -1442,6 +1566,22 @@ const statusMap = {
 .reset-button:hover {
   background-color: #e0e0e0;
   color: #333;
+}
+::v-deep(.dp__range_between) {
+  background-color: rgba(25, 118, 210, 0.2);
+  border-radius: 0 !important;
+}
+
+::v-deep(.dp__range_start) {
+  background-color: #1976d2 !important;
+  color: white !important;
+  border-radius: 50% !important;
+}
+
+::v-deep(.dp__range_end) {
+  background-color: #1976d2 !important;
+  color: white !important;
+  border-radius: 50% !important;
 }
 
 </style>
