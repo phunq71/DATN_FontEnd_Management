@@ -264,7 +264,7 @@ const toggleSize = (size, variantId, checked) => {
                       class="image-preview"
                   >
                     <img
-                        :src="img.isNew ? img.preview : 'http://localhost:8989/uploads/' + img.fileName"
+                        :src="img.isNew ? img.preview : 'https://phudatn.blob.core.windows.net/images/' + img.fileName"
                         alt="Product image"
                     >
                     <button @click="removeImage(index)" class="delete-image-btn">

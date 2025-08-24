@@ -77,13 +77,19 @@ onMounted(async () => {
           <span>Quản lý sản phẩm</span>
         </router-link>
 
+        <router-link to="/VouchersManagement" class="menu-item" v-if="isAdmin">
+          <i class="fas fa-tags"></i>
+          <span>Quản lý khuyến mãi</span>
+        </router-link>
+
+
         <router-link to="/staffs" class="menu-item">
           <i class="fa-solid fa-users"></i>
           <span>Quản lý nhân viên</span>
 
         </router-link>
 
-          <router-link to="/CustomerManagement" class="menu-item">
+          <router-link to="/CustomerManagement" class="menu-item" v-if="isAdmin">
             <i class="fas fa-handshake"></i>
             <span>Quản lý khách hàng</span>
           </router-link>
@@ -98,7 +104,7 @@ onMounted(async () => {
           <span>Thống kê</span>
         </router-link>
 
-        <router-link to="/facility" class="menu-item">
+        <router-link to="/facility" class="menu-item" v-if="isAdmin">
           <i class="fa-solid fa-building"></i>
           <span>Quản lý khu vực & cơ sở</span>
         </router-link>
