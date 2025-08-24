@@ -17,6 +17,8 @@ import Facility from '../components/Facility.vue';
 import Category from '../components/Category.vue';
 import MembershipManagement from "../components/MembershipManagement.vue";
 import CustomerManagement from "../components/CustomerManagement.vue";
+import VouchersManagement from "../components/VouchersManagement.vue";
+
 const routes = [
     {
         path: '/',
@@ -60,6 +62,11 @@ const routes = [
     {
         path: '/category',
         component: Category,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/VouchersManagement',
+        component: VouchersManagement,
         meta: { requiresAuth: true }
     },
     {
