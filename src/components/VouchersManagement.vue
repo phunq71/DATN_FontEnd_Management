@@ -1278,7 +1278,7 @@ onMounted(() => {
   <div v-if="showModal" class="modal-backdrop fade show"></div>
 </template>
 
-<style>
+<style scoped>
 .promotion-container {
   max-width: 95%;
   margin: auto;
