@@ -83,22 +83,22 @@ onMounted(async () => {
 
         </router-link>
 
-          <router-link to="/CustomerManagement" class="menu-item">
+          <router-link to="/CustomerManagement" class="menu-item" v-if="isAdmin">
             <i class="fas fa-handshake"></i>
             <span>Quản lý khách hàng</span>
           </router-link>
 
-<!--        <div class="menu-item">-->
-<!--          <i class="fa-solid fa-lock"></i>-->
-<!--          <span>Bảo mật</span>-->
-<!--        </div>-->
+        <router-link to="/VouchersManagement" class="menu-item" v-if="isAdmin">
+          <i class="fas fa-tags"></i>
+          <span>Quản lý khuyến mãi</span>
+        </router-link>
 
         <router-link to="/dashboard" class="menu-item">
           <i class="fa-solid fa-chart-line"></i>
           <span>Thống kê</span>
         </router-link>
 
-        <router-link to="/facility" class="menu-item">
+        <router-link to="/facility" class="menu-item" v-if="isAdmin">
           <i class="fa-solid fa-building"></i>
           <span>Quản lý khu vực & cơ sở</span>
         </router-link>
