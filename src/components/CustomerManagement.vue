@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch, onUnmounted, computed, nextTick } from 'vue';
 import Chart from 'chart.js/auto';
+import Swal from "sweetalert2";
 // Dữ liệu mẫu khách hàng (giữ nguyên)
 const customers = ref([]);
 // Phân trang cho khách hàng

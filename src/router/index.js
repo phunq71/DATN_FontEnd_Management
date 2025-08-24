@@ -16,6 +16,8 @@ import StaffManagement from "../components/StaffManagement.vue";
 
 import Category from '../components/Category.vue';
 import CustomerManagement from "../components/CustomerManagement.vue";
+
+import VouchersManagement from '../components/VouchersManagement.vue';
 const routes = [
     {
         path: '/',
@@ -87,7 +89,12 @@ const routes = [
         path: '/inventorySlips',
         component: InventorySlips,
         meta: {requiresAuth: true}
-    }
+    },
+    {
+        path: '/VouchersManagement',
+        component: VouchersManagement,
+        meta: {requiresAuth: true}
+    },
 ]
 
 const router = createRouter({

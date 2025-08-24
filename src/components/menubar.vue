@@ -70,6 +70,11 @@
           <span>Phiếu nhập/ xuất</span>
         </router-link>
 
+        <router-link to="/VouchersManagement" class="menu-item">
+          <i class="fas fa-tags"></i>
+          <span>Quản lý khuyến mãi</span>
+        </router-link>
+
 
         <div class="menu-item" @click="toggleSubmenu('documents')">
           <i class="fas fa-file-alt"></i>
