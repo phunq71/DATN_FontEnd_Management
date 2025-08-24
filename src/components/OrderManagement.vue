@@ -781,7 +781,7 @@ function showOrderDetail(order) {
       const price = p.originalPrice * (1 - p.discountPercent / 100);
       return {
         name: p.productName,                         // Tên sản phẩm
-        image: `http://localhost:8989/uploads/${p.image}`,  // Đường dẫn hình ảnh sản phẩm
+        image: `https://phudatn.blob.core.windows.net/images/${p.image}`,  // Đường dẫn hình ảnh sản phẩm
         originalPrice: p.originalPrice,              // Giá gốc
         discountPercent: p.discountPercent,          // Phần trăm giảm giá (%)
         quantity: p.quantity,                        // Số lượng

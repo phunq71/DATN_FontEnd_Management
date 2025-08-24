@@ -629,7 +629,7 @@ function goToProductConfig(productId) {
           <td>{{ product.targetCustomer }}</td>
           <td>{{ product.brand }}</td>
           <td>
-            <img :src="'http://localhost:8989/uploads/' + product.image" alt="Product image" class="product-image">
+            <img :src="'https://phudatn.blob.core.windows.net/images/' + product.image" alt="Product image" class="product-image">
           </td>
           <td>
             <div v-if="product.discount && product.discount < product.price">

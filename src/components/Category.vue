@@ -84,8 +84,8 @@
                 previewBanner
                   ? previewBanner
                   : form.banner
-                    ? 'http://localhost:8989/uploads/' + form.banner
-                    : 'http://localhost:8989/uploads/null.png'
+                    ? 'https://phudatn.blob.core.windows.net/images/' + form.banner
+                    : 'https://phudatn.blob.core.windows.net/images/'
               "
                             alt="banner"
                             class="banner clickable"

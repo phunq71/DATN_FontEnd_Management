@@ -644,7 +644,7 @@ const props = defineProps({
             <div class="form-group">
               <label>Ảnh đại diện:</label>
               <img v-if="customerForm.imageAvt"
-                   :src="'http://localhost:8989/uploads/' + customerForm.imageAvt" alt="Avt"
+                   :src="'https://phudatn.blob.core.windows.net/images/' + customerForm.imageAvt" alt="Avt"
                    class="Avt-img" style="height: 250px; width: 300px;">
               <span v-else>Chưa có</span>
 
@@ -805,7 +805,7 @@ const props = defineProps({
             <td>{{ item.quantity }}</td>
             <td>
               <img v-if="item && item.imageUrl"
-                   :src="'http://localhost:8989/uploads/' + item.imageUrl" alt="Ảnh sản phẩm"
+                   :src="'https://phudatn.blob.core.windows.net/images/' + item.imageUrl" alt="Ảnh sản phẩm"
                    class="product-img" style="height: 150px; width: 150px;">
               <span v-else>Chưa có</span>
             </td>

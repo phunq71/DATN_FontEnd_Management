@@ -875,7 +875,7 @@ async function deleteVariant() {
             <img
                 v-for="img in variant.images"
                 :key="img.id"
-                :src="'http://localhost:8989/uploads/' + img.fileName"
+                :src="'https://phudatn.blob.core.windows.net/images/' + img.fileName"
                 alt="Main product image"
                 class="product-image"
             >
@@ -930,7 +930,7 @@ async function deleteVariant() {
                 style="position: relative; width: 100px;"
             >
               <img
-                  :src="img.isNew ? img.preview : 'http://localhost:8989/uploads/' + img.fileName"
+                  :src="img.isNew ? img.preview : 'https://phudatn.blob.core.windows.net/images/' + img.fileName"
                   alt="Product image"
                   style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc;"
               />

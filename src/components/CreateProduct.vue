@@ -264,7 +264,7 @@ const toggleSize = (size, variantId, checked) => {
                       class="image-preview"
                   >
                     <img
-                        :src="img.isNew ? img.preview : 'http://localhost:8989/uploads/' + img.fileName"
+                        :src="img.isNew ? img.preview : 'https://phudatn.blob.core.windows.net/images/' + img.fileName"
                         alt="Product image"
                     >
                     <button @click="removeImage(index)" class="delete-image-btn">
@@ -362,7 +362,7 @@ const toggleSize = (size, variantId, checked) => {
                   <td>
                     <img
                         v-if="variant.images.length > 0"
-                        :src="'http://localhost:8989/uploads/' + variant.images.find(img => img.isMain)?.fileName || variant.images[0].fileName"
+                        :src="'https://phudatn.blob.core.windows.net/images/' + variant.images.find(img => img.isMain)?.fileName || variant.images[0].fileName"
                         alt="Variant image"
                         class="variant-thumbnail"
                     >
