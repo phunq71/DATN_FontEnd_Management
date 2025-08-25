@@ -18,7 +18,7 @@
           <!-- Loại -->
           <div class="col-md-6">
             <label class="form-label">Loại</label>
-            <select v-model="form.type" @change="updateParentOptions" class="form-select">
+            <select :disabled="editingFacility" v-model="form.type" @change="updateParentOptions" class="form-select">
               <option value="Z">Khu vực</option>
               <option value="S">Shop</option>
               <option value="K">Kho</option>
@@ -600,7 +600,62 @@ export default {
     },
     async saveFacility() {
       try {
-        // Build lại addressIdGHN và address ngay trong saveFacility
+        // === VALIDATE TRƯỚC ===
+        const errors = [];
+        if (this.form.type !== "Z") {
+
+        }
+
+        if (!this.form.facilityName || this.form.facilityName.trim() === "") {
+          errors.push("Tên cơ sở không được để trống.");
+        } else if (this.form.facilityName.length > 100) {
+          errors.push("Tên cơ sở không được vượt quá 100 ký tự.");
+        }
+
+        if (!this.form.type) {
+          errors.push("Vui lòng chọn loại cơ sở.");
+        }
+
+        if (this.form.isUse === null || this.form.isUse === undefined) {
+          errors.push("Vui lòng chọn trạng thái hoạt động.");
+        }
+        if(this.form.type !== "Z"){
+          if (!this.selectedProvince) {
+            errors.push("Vui lòng chọn Tỉnh/Thành phố.");
+          }
+          if (!this.selectedDistrict) {
+            errors.push("Vui lòng chọn Quận/Huyện.");
+          }
+          if (!this.selectedWard) {
+            errors.push("Vui lòng chọn Phường/Xã.");
+          }
+          if (!this.form.addressDetail || this.form.addressDetail.trim() === "") {
+            errors.push("Vui lòng nhập số nhà, tên đường.");
+          }
+
+          if (this.form.parentId && !this.parentOptions.some(f => f.facilityId === this.form.parentId)) {
+            errors.push("Cơ sở cha không hợp lệ.");
+          }
+        }
+        if (this.form.type !== "Z") {
+          if (!this.form.parentId) {
+            errors.push("Vui lòng chọn cơ sở cha.");
+          } else if (!this.parentOptions.some(f => f.facilityId === this.form.parentId)) {
+            errors.push("Cơ sở cha không hợp lệ.");
+          }
+        }
+
+        // Nếu có lỗi thì hiện Swal và return luôn
+        if (errors.length > 0) {
+          Swal.fire({
+            icon: "error",
+            title: "Lỗi xác thực",
+            html: errors.map(e => `<div>- ${e}</div>`).join(""),
+          });
+          return;
+        }
+
+        // === BUILD ADDRESS ===
         let addressIdGHN = "";
         let address = "";
 
@@ -627,8 +682,9 @@ export default {
           address = addressParts.join(", ");
         }
 
+        // === PAYLOAD ===
         const payload = {
-          facilityName: this.form.facilityName,
+          facilityName: this.form.facilityName.trim(),
           address: address,
           addressIdGHN: addressIdGHN,
           type: this.form.type,
@@ -636,22 +692,34 @@ export default {
           isUse: this.form.isUse
         };
 
+        // === CALL API ===
         if (this.editingFacility && this.editingFacility.facilityId) {
+          // if (this.form.type === "Z") {
+          //   Swal.fire("Thông báo", "Khu vực không được phép cập nhật", "warning");
+          //   return; // ⛔ Dừng lại, không gọi API
+          // }
           await api.put(`/admin/facility/${this.editingFacility.facilityId}`, payload, { withCredentials: true });
           Swal.fire("Thành công", "Cập nhật cơ sở thành công", "success");
-        } else {
+        }
+        else {
+          // if (this.form.type === "Z") {
+          //   Swal.fire("Thông báo", "Vui lòng chọn loại cơ sở", "warning");
+          //   return; // ⛔ Dừng, không gọi API
+          // }
           await api.post("/admin/facility", payload, { withCredentials: true });
           Swal.fire("Thành công", "Thêm cơ sở thành công", "success");
+
         }
 
+        // Reset + reload
         this.resetForm();
         this.loadFacilities();
+
       } catch (err) {
         console.error("❌ API lỗi:", err.response || err);
         Swal.fire("Lỗi", err.response?.data?.message || "Thao tác thất bại", "error");
       }
-    }
-    ,
+    } ,
     async deleteFacility(id) {
       try {
         const confirmResult = await Swal.fire({

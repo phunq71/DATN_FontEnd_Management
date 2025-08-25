@@ -121,7 +121,6 @@ onMounted(async () => {
         <router-link to="/membership" class="menu-item">
           <i class="fa-solid fa-medal"></i>
           <span>Membership</span>
-
         </router-link>
 
 

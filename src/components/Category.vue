@@ -39,8 +39,7 @@
               <input v-model="form.categoryName" 
                     type="text" 
                     placeholder="Tên danh mục"
-                    class="cm-form-control" 
-                    required>
+                    class="cm-form-control">
             </div>
             
             <div class="cm-form-group">
@@ -92,7 +91,7 @@
                             @click="triggerFileSelect"
             />
 
-            <textarea class="content" v-model="form.content" required></textarea>
+            <textarea class="content" v-model="form.content" ></textarea>
           </div>
         </form>
       </div>
@@ -221,45 +220,73 @@ const flattenTree = (tree, depth = 0) => {
 
 const saveCategory = async () => {
   try {
-    if (newFile.value === null && form.value.banner === '') {
+    const errors = [];
+
+    // 1. Validate CategoryName
+    if (!form.value.categoryName || form.value.categoryName.trim() === "") {
+      errors.push("Tên danh mục không được để trống.");
+    } else if (form.value.categoryName.length > 100) {
+      errors.push("Tên danh mục không được vượt quá 100 ký tự.");
+    }
+
+    // 2. Validate ParentID (nếu có)
+    if (
+        form.value.parentID &&
+        !parentCategoryList.value.some(cat => cat.categoryID === form.value.parentID)
+    ) {
+      errors.push("Danh mục cha không hợp lệ.");
+    }
+
+    // 3. Validate Banner (ảnh)
+    if (newFile.value === null && !form.value.banner) {
+      errors.push("Vui lòng thêm ảnh trước khi tiếp tục.");
+    }
+
+    // 4. Validate Content
+    if (form.value.content && form.value.content.length > 500) {
+      errors.push("Nội dung mô tả không được vượt quá 500 ký tự.");
+    }
+
+    // Nếu có lỗi => hiện Swal và dừng
+    if (errors.length > 0) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Thiếu ảnh',
-        text: 'Vui lòng thêm ảnh trước khi tiếp tục!',
-        confirmButtonText: 'OK'
+        icon: "error",
+        title: "Lỗi xác thực",
+        html: errors.map(e => `<div>- ${e}</div>`).join(""),
       });
       return;
     }
 
+    // === Build FormData ===
     const fd = new FormData();
-
-// append JSON dưới dạng string
     fd.append("category", JSON.stringify(form.value));
 
-// append file nếu có
     if (newFile.value) {
       fd.append("file", newFile.value);
     }
 
+    // === Gọi API ===
     if (isEdit.value) {
       await api.put(`/admin/category/${form.value.categoryID}`, fd, {
         withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" },
       });
       showSuccess("Cập nhật danh mục thành công!");
     } else {
       await api.post("/admin/category", fd, {
         withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" },
       });
       showSuccess("Thêm danh mục mới thành công!");
     }
-    resetForm()
-    await loadCategories()
+
+    resetForm();
+    await loadCategories();
   } catch (err) {
-    showError(err.response?.data || 'Lỗi thao tác')
+    showError(err.response?.data || "Lỗi thao tác");
   }
-}
+};
+
 
 const resetForm = () => {
   form.value = { categoryID: '', categoryName: '', parentID: '', content: '', banner: '' }
@@ -290,7 +317,8 @@ const deleteCategory = async (id) => {
     try {
       await api.delete(`/admin/category/${id}`, { withCredentials: true })
       showSuccess('Xóa danh mục thành công!')
-      await loadCategories()
+      await loadCategories();
+      resetForm();
     } catch (err) {
       showError(err.response?.data || 'Không thể xóa danh mục')
     }
@@ -349,7 +377,7 @@ const showSuccess = (message) => {
 const showError = (message) => {
   Swal.fire({
     title: 'Lỗi!',
-    text: "Thao tác này không được phép!",
+    text: "Không thể xóa vì đang có danh mục con!",
     icon: 'error',
     confirmButtonText: 'OK',
     confirmButtonColor: '#ef4444'
