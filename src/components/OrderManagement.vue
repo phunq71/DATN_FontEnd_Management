@@ -343,6 +343,9 @@
             <div class="action-buttons" v-else-if="selectedOrder.Status === 'Yêu cầu hủy'">
               <button @click="chapnhanHuy(selectedOrder.OrderID, $event)" class="confirm-btn">Chấp nhận hủy</button>
             </div>
+            <div class="action-buttons" v-else-if="selectedOrder.Status === 'Yêu cầu hủy' && selectedOrder.Status === 'Chuẩn bị đơn'">
+              <button @click="markReadyToShip" class="confirm-btn">Sẵn sàng giao</button>
+            </div>
           </div>
       </div>
     </div>

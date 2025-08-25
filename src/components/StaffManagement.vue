@@ -243,7 +243,9 @@ async function loadPageStaffs(){
       })
   totalPages.value=pageStaff.data.totalPages;
   staffs.value=pageStaff.data.content;
-
+  let manager = staffs.value.find(staff => staff.role === 'AREA');
+  managerId = manager ? manager.staffID : null;
+  console.log("managerID", managerId)
   // console.log("params: ", params);
   // console.log("page", pageStaff.data);
   // console.log("list", staffs.value);
@@ -433,8 +435,13 @@ const proceedWithSave = async () => {
         confirmButtonColor: '#000'
       });
       if(response.data.status==="success"){
+        let cArea = selectedArea.value;
+        let cShop = selectedShop.value;
         await fetchAreasAndShops();
         await loadPageStaffs();
+        selectedShop.value= cShop;
+        selectedArea.value= cArea;
+
         //resetForm();
       }
 
@@ -494,6 +501,7 @@ const saveStaff = async () => {
 
   // Handle AREA role case
   if ( currentStaff.role === "AREA" && managerId!==null && managerId!==currentStaff.staffID ) {
+    console.log(managerId);
     demoteData.value.areaId = selectedArea.value;
     roleChangeModal.value.show();
   } else {
@@ -761,19 +769,19 @@ async function fetchAddress(){
 
 function findLocationNameById(id) {
   const numericId = id;
-
+  console.log(dataAddress);
   for (const province of dataAddress) {
-    if (province.ProvinceID === numericId) {
+    if (province.ProvinceID == numericId) {
       return province.ProvinceName;
     }
 
     for (const district of province.Districts) {
-      if (district.DistrictID === numericId) {
+      if (district.DistrictID == numericId) {
         return district.DistrictName;
       }
 
       for (const ward of district.Wards) {
-        if (ward.WardCode === numericId) {
+        if (ward.WardCode == numericId) {
           return ward.WardName;
         }
       }
