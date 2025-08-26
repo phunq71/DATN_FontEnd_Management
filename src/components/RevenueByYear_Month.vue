@@ -223,6 +223,7 @@ async function getRevenueByMonth(year) {
     updateMaxOrderCount(maxOrderCount);
 
     const revenues = data.map(item => item.revenue);
+    totalRevenue.value = 0;
     revenues.forEach(revenue => {
       totalRevenue.value += revenue;
     });
